@@ -1,5 +1,5 @@
 #!/bin/sh
-until pnpm run thor-music
+until pnpm start
 do
     echo "Restarting bot..."
     sleep 1
