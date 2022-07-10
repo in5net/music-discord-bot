@@ -3,20 +3,19 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt autoremove -y
 
-sudo apt install git curl tmux -y
-# xvfb libgl1-mesa-dev python-is-python3
+sudo apt install git curl tmux python-is-python3 -y
 
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 sudo npm i -g pnpm
 
-git clone https://github.com/limitlesspc/discord-bots.git
+git clone https://github.com/limitlesspc/music-discord-bot.git
 
 gsutil -m cp -r \
-  "gs://in5net-vm-transfer/.npmrc" \
   "gs://in5net-vm-transfer/discord-bots" \
   .
 
-cd discord-bots
-pnpm run setup
+cd music-discord-bot
+pnpm i
+pnpm run build
