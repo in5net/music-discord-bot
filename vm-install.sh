@@ -13,7 +13,7 @@ sudo npm i -g pnpm
 git clone https://github.com/limitlesspc/music-discord-bot.git
 
 gsutil -m cp -r \
-  "gs://in5net-vm-transfer/discord-bots" \
+  "gs://in5net-vm-transfer/music-discord-bot" \
   .
 
 cd music-discord-bot
