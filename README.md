@@ -1,7 +1,7 @@
 # music-discord-bot
 
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-[![license](https://img.shields.io/github/license/limitlesspc/discord-bots.svg)](LICENSE)
+[![license](https://img.shields.io/github/license/limitlesspc/music-discord-bot.svg)](LICENSE)
 
 A Discord music bot I created for fun
 

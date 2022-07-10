@@ -1,4 +1,4 @@
-import { Client, MessageEmbed } from 'discord.js';
+import { Client, MessageEmbed, Options } from 'discord.js';
 import type { IntentsString, Message } from 'discord.js';
 
 import type Command from './command';
@@ -20,7 +20,26 @@ export default class DiscordBot {
     console.time(name);
     this.client = new Client({
       intents,
-      partials: ['CHANNEL']
+      partials: ['CHANNEL'],
+      makeCache: Options.cacheWithLimits({
+        ApplicationCommandManager: 0,
+        BaseGuildEmojiManager: 0,
+        GuildEmojiManager: 0,
+        GuildMemberManager: 0,
+        GuildBanManager: 0,
+        GuildInviteManager: 0,
+        GuildScheduledEventManager: 0,
+        GuildStickerManager: 0,
+        MessageManager: 0,
+        PresenceManager: 0,
+        ReactionManager: 0,
+        ReactionUserManager: 0,
+        StageInstanceManager: 0,
+        ThreadManager: 0,
+        ThreadMemberManager: 0,
+        UserManager: 0,
+        VoiceStateManager: 0
+      })
     }).once('ready', () => {
       console.timeEnd(name);
       console.log(`✅ ${name} is ready!`);
