@@ -23,7 +23,7 @@ model Playlist {
   updatedAt DateTime @updatedAt
 
   uid   String @db.Char(18)
-  name  String
+  name  String @db.VarChar(100)
   songs Json
 
   @@unique([uid, name])
@@ -33,46 +33,29 @@ model Ratio {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  text String @unique
+  content String @unique
 }
 
 model File {
-  id String @id @default(cuid())
+  name String @id @db.VarChar(100)
 
-  name      String
   extension String @db.VarChar(4)
 
-  @@unique([name, extension])
   @@fulltext([name])
 }
 
-model Y7Image {
-  id String @id @default(cuid())
+model Y7File {
+  name String @id @db.VarChar(100)
 
-  fileName String @unique
-  size     Int
-  width    Int    @db.UnsignedSmallInt
-  height   Int    @db.UnsignedSmallInt
+  extension String @db.VarChar(4)
 
-  @@fulltext([fileName])
-}
-
-model Y7GIF {
-  id String @id @default(cuid())
-
-  fileName String @unique
-  size     Int    @db.UnsignedInt
-  width    Int    @db.UnsignedSmallInt
-  height   Int    @db.UnsignedSmallInt
-  frames   Int    @db.UnsignedSmallInt
-
-  @@fulltext([fileName])
+  @@fulltext([name])
 }
 
 model Chicken {
-  fileName String @id
+  name String @id @db.VarChar(100)
 }
 
 model SpeechBubble {
-  fileName String @id
+  name String @id @db.VarChar(100)
 }
