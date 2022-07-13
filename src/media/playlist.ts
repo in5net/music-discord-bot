@@ -114,7 +114,7 @@ export async function add(
       songs
     },
     update: {
-      songs: [...(playlist?.songs || []), ...songs]
+      songs: [...((playlist?.songs || []) as Prisma.JsonArray), ...songs]
     },
     where: {
       uid_name: {
