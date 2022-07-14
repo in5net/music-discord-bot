@@ -61,13 +61,16 @@ export default command(
 
     await i.reply({ embeds: [embed], components: [row] });
     i.channel
-      ?.createMessageComponentCollector({ time: 60_000 })
+      ?.createMessageComponentCollector({
+        filter: ({ user }) => user.id === i.user.id,
+        time: 60_000
+      })
       .on('collect', async i => {
         const { customId } = i;
         if (customId === 'back') page--;
         else if (customId === 'next') page++;
         generateEmbed();
-        await i.editReply({ embeds: [embed], components: [row] });
+        await i.update({ embeds: [embed], components: [row] });
       })
       .once('end', async () => {
         await i.editReply({ embeds: [embed] });
