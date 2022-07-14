@@ -16,6 +16,7 @@ export default command(
     const channel = guildMember?.voice.channel;
     if (!channel) return i.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.stop();
+    await player.stop();
+    return i.reply('⏹ Stopped');
   }
 );

@@ -104,6 +104,7 @@ client
             })
           )
         );
+        if (!i.replied) await i.reply('✅ Success');
       } catch (error) {
         const name = [
           i.commandName,
