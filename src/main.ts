@@ -5,7 +5,6 @@ import {
 } from 'discord.js';
 
 import client from './client';
-import players from './players';
 import * as rawCommands from './commands';
 import type {
   Command,
@@ -15,10 +14,9 @@ import type {
 } from '$services/command';
 
 const commands = Object.fromEntries(
-  Object.entries(rawCommands).map(([name, command]) => [
-    name,
-    normalize(command as Command | Commands | CommandGroups)
-  ])
+  Object.entries(rawCommands as unknown as Commands | CommandGroups).map(
+    ([name, command]) => [name, normalize(command)]
+  )
 );
 function normalize(
   command: Command | Commands | CommandGroups
@@ -106,7 +104,6 @@ client
             })
           )
         );
-        if (!i.replied) await i.reply({ content: null });
       } catch (error) {
         const name = [
           i.commandName,
@@ -149,14 +146,4 @@ client
         .catch(console.error);
     }
   })
-  .on('interactionError', console.error)
-  .on('voiceStateUpdate', oldState => {
-    if (
-      oldState.channel?.members.has(process.env.DISCORD_BOT_ID || '') &&
-      oldState.channel?.members.size === 1
-    ) {
-      const guildId = oldState.guild.id;
-      const player = players.get(guildId);
-      player?.stop();
-    }
-  });
+  .on('interactionError', console.error);
