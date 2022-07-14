@@ -6,7 +6,8 @@ import type {
   TextChannel
 } from 'discord.js';
 
-import { addOwnerUsername, color } from '../config';
+import { secondsToTime } from '$services/time';
+import { color } from '$services/config';
 import type { MediaType as Media } from './media';
 
 const pageSize = 5;
@@ -26,10 +27,6 @@ export default class Queue extends Array<Media> {
     const { current } = this;
     if (current) medias.unshift(current);
     return medias;
-  }
-
-  anyNotRequestedBy(uid: string): boolean {
-    return this.getMedias().some(media => media.requester.uid !== uid);
   }
 
   enqueue(...medias: Media[]) {
@@ -107,7 +104,6 @@ export default class Queue extends Array<Media> {
           this.length + (this.current ? 1 : 0)
         }`
       });
-      addOwnerUsername(embed);
 
       const { current } = this;
       if (current) {
@@ -156,17 +152,10 @@ export default class Queue extends Array<Media> {
   }
 
   songEmbed(index: number): MessageEmbed | void {
+    index = (index + this.length) % this.length;
     const media = index ? this[index - 1] : this.current;
     if (!media) return;
     const embed = media.getEmbed();
-    addOwnerUsername(embed);
     return embed;
   }
-}
-
-export function secondsToTime(seconds: number): string {
-  if (isNaN(seconds)) return 'unknown';
-  const minutes = Math.floor(seconds / 60);
-  seconds = Math.floor(seconds - minutes * 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }

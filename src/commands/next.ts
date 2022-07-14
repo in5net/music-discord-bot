@@ -1,24 +1,22 @@
-// eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
 import woof from '$services/woof';
-import { command } from '$shared/command';
+import command from '$services/command';
 
 export default command(
   {
-    name: 'next',
-    aliases: ['n', 'skip'],
     desc: 'Skips a song and plays the next one',
-    args: [] as const
+    options: {}
   },
-  async message => {
-    const { guildId } = message;
-    if (!guildId) return;
-    const player = getPlayer(guildId);
+  async i => {
+    const { guild, member } = i;
+    if (!guild || !member) return;
+    const player = getPlayer(guild.id);
+    const guildMember = await guild.members.cache.get(member.user.id);
 
-    const channel = message.member?.voice.channel;
-    if (channel?.type !== 'GUILD_VOICE')
-      return message.reply(`${woof()}, you are not in a voice channel`);
+    const channel = guildMember?.voice.channel;
+    if (!channel) return i.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.next(message.author.id);
+    await player.next();
+    return i.reply('⏩ Next');
   }
 );

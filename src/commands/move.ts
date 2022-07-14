@@ -1,49 +1,30 @@
-// eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
 import woof from '$services/woof';
-import { command } from '$shared/command';
+import command from '$services/command';
 
 export default command(
   {
-    name: 'move',
-    aliases: ['mv'],
-    desc: 'Moves song #i to position #j in the queue. You may use `last` to refer to the last song in the queue',
-    args: [
-      {
-        name: 'i',
-        type: 'string',
+    desc: 'Moves song in the queue, where negative numbers go from the end of the queue.',
+    options: {
+      from: {
+        type: 'int',
         desc: 'The song number to move'
       },
-      {
-        name: 'j',
-        type: 'string',
+      to: {
+        type: 'int',
         desc: 'The position to move the song to'
       }
-    ] as const
+    }
   },
-  async (message, [fromStr, toStr]) => {
-    const { guildId, author } = message;
-    if (!guildId) return;
-    const player = getPlayer(guildId);
+  async (i, { from, to }) => {
+    const { guild, member } = i;
+    if (!guild || !member) return;
+    const player = getPlayer(guild.id);
+    const guildMember = await guild.members.cache.get(member.user.id);
 
-    const channel = message.member?.voice.channel;
-    if (channel?.type !== 'GUILD_VOICE')
-      return message.reply(`${woof()}, you are not in a voice channel`);
+    const channel = guildMember?.voice.channel;
+    if (!channel) return i.reply(`${woof()}, you are not in a voice channel`);
 
-    const from =
-      fromStr === 'last' ? player.queue.length - 1 : parseInt(fromStr) - 2;
-    const to = toStr === 'last' ? player.queue.length - 1 : parseInt(toStr) - 2;
-
-    if (
-      isNaN(from) ||
-      isNaN(to) ||
-      from < 0 ||
-      to < 0 ||
-      from >= player.queue.length ||
-      to >= player.queue.length
-    )
-      return message.reply(`${woof()}, please provide valid numbers`);
-
-    return player.move(from, to, author.id);
+    return player.move(from, to);
   }
 );

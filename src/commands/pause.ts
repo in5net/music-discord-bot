@@ -1,23 +1,26 @@
-// eslint-disable-next-line import/no-cycle
-import { getPlayer } from '../players';
+import { AudioPlayerStatus } from '@discordjs/voice';
+
 import woof from '$services/woof';
-import { command } from '$shared/command';
+import command from '$services/command';
+import { getPlayer } from '../players';
 
 export default command(
   {
-    name: 'pause',
     desc: 'Pauses/unpauses the current song',
-    args: [] as const
+    options: {}
   },
-  async message => {
-    const { guildId } = message;
-    if (!guildId) return;
-    const player = getPlayer(guildId);
+  async i => {
+    const { guild, member } = i;
+    if (!guild || !member) return;
+    const player = getPlayer(guild.id);
+    const guildMember = await guild.members.cache.get(member.user.id);
 
-    const channel = message.member?.voice.channel;
-    if (channel?.type !== 'GUILD_VOICE')
-      return message.reply(`${woof()}, you are not in a voice channel`);
+    const channel = guildMember?.voice.channel;
+    if (!channel) return i.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.pause(message.author.id);
+    const paused = player.player.state.status === AudioPlayerStatus.Paused;
+    if (paused) await player.player.unpause();
+    else await player.player.pause(true);
+    return i.reply(paused ? '⏯️ Resumed' : '⏸️ Paused');
   }
 );

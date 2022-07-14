@@ -1,4 +1,6 @@
+import type { User } from 'discord.js';
 import type { Prisma } from '@prisma/client';
+
 import prisma from '$services/prisma';
 import {
   FileMedia,
@@ -8,7 +10,21 @@ import {
   SpotifyMedia,
   URLMedia,
   YouTubeMedia
-} from './media';
+} from '../../media/media';
+
+export async function autocomplete(query: string): Promise<string[]> {
+  const playlists = await prisma.playlist.findMany({
+    select: {
+      name: true
+    },
+    where: {
+      name: {
+        contains: query
+      }
+    }
+  });
+  return playlists.map(({ name }) => name);
+}
 
 async function getPlaylist(uid: string, name: string) {
   const { id, songs } = await prisma.playlist.findFirstOrThrow({
@@ -24,15 +40,9 @@ async function getPlaylist(uid: string, name: string) {
   return { id, songs: songs as unknown as MediaJSONType[], uid, name };
 }
 
-export async function get(
-  requester: {
-    uid: string;
-    name: string;
-  },
-  name: string
-): Promise<MediaType[]> {
+export async function get(requester: User, name: string): Promise<MediaType[]> {
   try {
-    const playlist = await getPlaylist(requester.uid, name);
+    const playlist = await getPlaylist(requester.id, name);
     return playlist.songs.map(mediaJSON => {
       switch (mediaJSON.type) {
         case 'youtube':

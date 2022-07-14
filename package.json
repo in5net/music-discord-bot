@@ -10,15 +10,19 @@
     "build": "prisma generate",
     "update": "NPM_CHECK_INSTALLER=pnpm npm-check -u",
     "start": "node -r @swc-node/register src/main.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "deploy": "node -r @swc-node/register src/deploy.ts",
+    "deploy:prod": "NODE_ENV=production pnpm run deploy"
   },
   "dependencies": {
     "@discord-player/downloader": "^3.0.1",
+    "@discordjs/rest": "^0.5.0",
     "@discordjs/voice": "0.10.0",
     "@googleapis/youtube": "6.0.0",
     "@limitlesspc/limitless": "0.0.2",
     "@prisma/client": "^4.0.0",
     "chalk": "4",
+    "discord-api-types": "^0.36.1",
     "discord.js": "13.8.1",
     "dotenv": "16.0.1",
     "ffmpeg-static": "5.0.2",
@@ -28,9 +32,9 @@
   },
   "devDependencies": {
     "@swc-node/register": "^1.5.1",
-    "@types/node": "18.0.3",
-    "@typescript-eslint/eslint-plugin": "5.30.5",
-    "@typescript-eslint/parser": "5.30.5",
+    "@types/node": "18.0.4",
+    "@typescript-eslint/eslint-plugin": "5.30.6",
+    "@typescript-eslint/parser": "5.30.6",
     "eslint": "8.19.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "17.0.0",
