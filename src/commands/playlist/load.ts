@@ -33,11 +33,9 @@ export default command(
     player.setChannels(i);
     let allMedias: MediaType[] = [];
     const cache = new Map<string, MediaType[]>();
-    for (const name of names) {
+    for (const name of names.split(' ')) {
       let medias = cache.get(name);
-      if (!medias) {
-        medias = await get(i.user, name).catch(() => []);
-      }
+      if (!medias) medias = await get(i.user, name).catch(() => []);
       allMedias.push(...medias);
     }
 
