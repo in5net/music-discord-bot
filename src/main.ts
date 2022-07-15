@@ -114,19 +114,21 @@ client
           .filter(Boolean)
           .join(' ');
         console.error(`Error while running command '${name}':`, error);
-        if (error instanceof Error)
-          return i
-            .reply({
-              embeds: [
-                new MessageEmbed()
-                  .setColor('RED')
-                  .setTitle('Error')
-                  .setDescription(error.message)
-                  .setTimestamp()
-              ],
-              ephemeral: true
-            })
-            .catch(console.error);
+        if (error instanceof Error) {
+          const embed = new MessageEmbed()
+            .setColor('RED')
+            .setTitle('Error')
+            .setDescription(error.message)
+            .setTimestamp();
+          if (i.replied)
+            await i
+              .followUp({ embeds: [embed], ephemeral: true })
+              .catch(console.error);
+          else
+            await i
+              .reply({ embeds: [embed], ephemeral: true })
+              .catch(console.error);
+        }
       }
     } else if (i.isAutocomplete()) {
       const command = getCommand(i);
