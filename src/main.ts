@@ -108,8 +108,8 @@ client
       } catch (error) {
         const name = [
           i.commandName,
-          i.options.getSubcommandGroup(),
-          i.options.getSubcommand()
+          i.options.getSubcommandGroup(false),
+          i.options.getSubcommand(false)
         ]
           .filter(Boolean)
           .join(' ');
