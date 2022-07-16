@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, User } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
 import type {
@@ -9,7 +9,7 @@ import type {
   SpotifyTrack
 } from 'play-dl';
 
-import { Channel, getDetails, search } from '../youtube';
+import { Channel, getDetails, search } from '$services/youtube';
 
 interface MediaJSON {
   title: string;
@@ -19,10 +19,7 @@ abstract class Media {
   constructor(
     public title: string,
     public duration: number, // seconds
-    public requester: {
-      uid: string;
-      name: string;
-    }
+    public requester: User
   ) {}
 
   abstract iconURL: string;
@@ -36,7 +33,7 @@ abstract class Media {
   getEmbed(): MessageEmbed {
     const { title, requester, iconURL } = this;
     return new MessageEmbed().setTitle(title).setFooter({
-      text: `Requested by ${requester.name}`,
+      text: `Requested by ${requester.username}`,
       iconURL
     });
   }
@@ -58,10 +55,7 @@ export class YouTubeMedia extends Media {
     public channel: Channel,
     title: string,
     duration: number,
-    requester: {
-      uid: string;
-      name: string;
-    },
+    requester: User,
     public time?: number
   ) {
     super(title, duration, requester);
@@ -107,10 +101,7 @@ ${title} (${url})
   }
   static fromJSON(
     { id, time, description, thumbnail, channel, title, duration }: YouTubeJSON,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): YouTubeMedia {
     return new YouTubeMedia(
       id,
@@ -143,13 +134,7 @@ ${title} (${url})
       });
   }
 
-  static async fromId(
-    id: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<YouTubeMedia> {
+  static async fromId(id: string, requester: User): Promise<YouTubeMedia> {
     try {
       const { title, description, thumbnail, duration, channel } =
         await getDetails(id);
@@ -205,13 +190,7 @@ ${title} (${url})
     }
   }
 
-  static async fromURL(
-    url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<YouTubeMedia> {
+  static async fromURL(url: string, requester: User): Promise<YouTubeMedia> {
     const id = play.extractID(url);
     const media = await this.fromId(id, requester);
     const timeRegex = /\?t=(\d+)/;
@@ -222,10 +201,7 @@ ${title} (${url})
 
   static async fromSearch(
     query: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): Promise<YouTubeMedia> {
     try {
       const { title, description, thumbnail, duration, channel, id } =
@@ -268,10 +244,7 @@ ${title} (${url})
 
   static async fromPlaylistId(
     id: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): Promise<YouTubeMedia[]> {
     const playlist = await play.playlist_info(id);
     const videos = await playlist.all_videos();
@@ -327,10 +300,7 @@ export class SpotifyMedia extends Media {
     },
     title: string,
     duration: number,
-    requester: {
-      uid: string;
-      name: string;
-    },
+    requester: User,
     public thumbnail?: string,
     public album?: {
       name: string;
@@ -401,10 +371,7 @@ ${title} (${url})
   }
   static fromJSON(
     { id, ytId, artist, title, duration, thumbnail, album }: SpotifyJSON,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): SpotifyMedia {
     return new SpotifyMedia(
       id,
@@ -429,13 +396,7 @@ ${title} (${url})
     return embed;
   }
 
-  static async fromURL(
-    url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<SpotifyMedia> {
+  static async fromURL(url: string, requester: User): Promise<SpotifyMedia> {
     if (play.sp_validate(url) !== 'track') return Promise.reject();
 
     const {
@@ -474,23 +435,14 @@ ${title} (${url})
     );
   }
 
-  static fromId(
-    id: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<SpotifyMedia> {
+  static fromId(id: string, requester: User): Promise<SpotifyMedia> {
     const url = SpotifyMedia.id2URL(id);
     return this.fromURL(url, requester);
   }
 
   static async fromListURL(
     url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): Promise<SpotifyMedia[]> {
     const type = play.sp_validate(url);
     if (type !== 'album' && type !== 'playlist') return Promise.reject();
@@ -524,10 +476,7 @@ export class SoundCloudMedia extends Media {
     public thumbnail: string,
     title: string,
     duration: number,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ) {
     super(title, duration, requester);
   }
@@ -553,10 +502,7 @@ ${title} (${url})
   }
   static fromJSON(
     { url, user, thumbnail, title, duration }: SoundCloudJSON,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): SoundCloudMedia {
     return new SoundCloudMedia(
       url,
@@ -584,45 +530,27 @@ ${title} (${url})
 
   static async fromTrack(
     track: SoundCloudTrack,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): Promise<SoundCloudMedia> {
     const { url, name, durationInSec: duration, thumbnail, user } = track;
     return new SoundCloudMedia(url, user, thumbnail, name, duration, requester);
   }
 
-  static async fromURL(
-    url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<SoundCloudMedia> {
+  static async fromURL(url: string, requester: User): Promise<SoundCloudMedia> {
     if ((await play.so_validate(url)) !== 'track') return Promise.reject();
 
     const track = (await play.soundcloud(url)) as SoundCloudTrack;
     return this.fromTrack(track, requester);
   }
 
-  static fromId(
-    id: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<SoundCloudMedia> {
+  static fromId(id: string, requester: User): Promise<SoundCloudMedia> {
     const url = SpotifyMedia.id2URL(id);
     return this.fromURL(url, requester);
   }
 
   static async fromListURL(
     url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): Promise<SoundCloudMedia[]> {
     if ((await play.so_validate(url)) !== 'playlist') return Promise.reject();
 
@@ -639,13 +567,7 @@ interface URLJSON extends MediaJSON {
   url: string;
 }
 export class URLMedia extends Media {
-  constructor(
-    public url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ) {
+  constructor(public url: string, requester: User) {
     super(new URL(url).pathname.split('/').pop() || 'Unknown', NaN, requester);
   }
 
@@ -667,13 +589,7 @@ ${title} (${url})`);
     const { url, title, duration } = this;
     return { type: 'url', url, title, duration };
   }
-  static fromJSON(
-    { url }: URLJSON,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): URLMedia {
+  static fromJSON({ url }: URLJSON, requester: User): URLMedia {
     return new URLMedia(url, requester);
   }
 
@@ -681,13 +597,7 @@ ${title} (${url})`);
     return super.getEmbed().setColor('BLUE').setURL(this.url);
   }
 
-  static async fromURL(
-    url: string,
-    requester: {
-      uid: string;
-      name: string;
-    }
-  ): Promise<URLMedia> {
+  static async fromURL(url: string, requester: User): Promise<URLMedia> {
     return new URLMedia(url, requester);
   }
 }
@@ -701,10 +611,7 @@ export class FileMedia extends Media {
     public path: string,
     title: string,
     duration: number,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ) {
     super(title, duration, requester);
   }
@@ -729,10 +636,7 @@ ${title} (${path})`);
   }
   static fromJSON(
     { path, title, duration }: FileJSON,
-    requester: {
-      uid: string;
-      name: string;
-    }
+    requester: User
   ): FileMedia {
     return new FileMedia(path, title, duration, requester);
   }

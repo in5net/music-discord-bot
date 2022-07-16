@@ -13,13 +13,12 @@ import {
 import { Downloader } from '@discord-player/downloader';
 import play from 'play-dl';
 import {
+  CommandInteraction,
   InteractionCollector,
   Message,
   MessageActionRow,
-  MessageAttachment,
   MessageButton,
   MessageComponentInteraction,
-  MessageEmbed,
   MessageOptions,
   TextChannel,
   VoiceChannel
@@ -27,18 +26,13 @@ import {
 import { shuffle } from '@limitlesspc/limitless';
 import type { AudioResource } from '@discordjs/voice';
 
-import Queue, { secondsToTime } from './queue';
-import { getLyrics } from '../genius';
+import Queue from './queue';
 import { SoundCloudMedia, SpotifyMedia, URLMedia, YouTubeMedia } from './media';
-import * as playlist from './playlist';
-import { addOwnerUsername, color } from '../config';
-// eslint-disable-next-line import/no-cycle
-import bot from '../bot';
-import '../env';
+
 import type { MediaType } from './media';
 
 export default class Player {
-  private player = createAudioPlayer({
+  player = createAudioPlayer({
     behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause
     }
@@ -67,20 +61,17 @@ export default class Player {
       }
     });
 
-  private channel?: TextChannel;
+  channel?: TextChannel;
   private voiceChannel?: VoiceChannel;
-  private connection?: VoiceConnection;
+  connection?: VoiceConnection;
   private message?: Message;
 
   private soundboardCollector:
     | InteractionCollector<MessageComponentInteraction>
     | undefined;
-  private playlistGetCollector:
-    | InteractionCollector<MessageComponentInteraction>
-    | undefined;
 
   readonly queue = new Queue();
-  private timestamp = 0;
+  timestamp = 0;
 
   constructor(private onStop: () => void) {}
 
@@ -89,33 +80,17 @@ export default class Player {
     this.message = await this.channel?.send(message);
   }
 
-  setChannels(message: Message): void {
-    const { channel, member } = message;
-    if (channel.type === 'GUILD_TEXT') this.channel = channel;
-    const voiceChannel = member?.voice.channel;
+  setChannels(i: CommandInteraction): void {
+    const { guild, channel, member } = i;
+    if (channel?.type === 'GUILD_TEXT') this.channel = channel;
+    if (!guild || !member) return;
+    const guildMember = guild.members.cache.get(member.user.id);
+    const voiceChannel = guildMember?.voice.channel;
     if (voiceChannel?.type === 'GUILD_VOICE') this.voiceChannel = voiceChannel;
   }
 
-  async getMedias(message: Message, query?: string): Promise<MediaType[]> {
-    const { player, queue } = this;
-    const { author, member, attachments } = message;
-    const requester = {
-      uid: author.id,
-      name: member?.nickname || author.username
-    };
-
-    const urlMediasCache = new Map<string, URLMedia>();
-    for (const { url } of attachments.values()) {
-      let media = urlMediasCache.get(url);
-      if (!media) {
-        media = await URLMedia.fromURL(url, requester);
-        urlMediasCache.set(url, media);
-      }
-      queue.enqueue(media);
-      media.log();
-      if (player.state.status === AudioPlayerStatus.Playing)
-        await this.send(`⏏️ Added ${media.title} to queue`);
-    }
+  async getMedias(i: CommandInteraction, query?: string): Promise<MediaType[]> {
+    const requester = i.user;
 
     const queries: string[] = [];
     if (query) {
@@ -220,12 +195,16 @@ export default class Player {
     return medias;
   }
 
-  async add(message: Message, query?: string, shuffle = false): Promise<void> {
-    this.setChannels(message);
+  async add(
+    i: CommandInteraction,
+    query?: string,
+    shuffle = false
+  ): Promise<void> {
+    this.setChannels(i);
 
     const { queue, channel } = this;
 
-    const medias = await this.getMedias(message, query);
+    const medias = await this.getMedias(i, query);
     queue.enqueue(...medias);
     if (shuffle) queue.shuffle();
 
@@ -234,123 +213,27 @@ export default class Player {
         `⏏️ Added${shuffle ? ' & shuffled' : ''} ${medias
           .map(media => media.title)
           .slice(0, 10)
-          .join(', ')}${medias.length > 10 ? ', ...' : ''} to queue`
+          .join(', ')}${medias.length > 10 ? ', …' : ''} to queue`
       );
 
     return this.play();
   }
 
-  async playnow(uid: string, message: Message, query?: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
-    this.setChannels(message);
-
-    const { queue, channel } = this;
-
-    const medias = await this.getMedias(message, query);
-    queue.enqueueNow(...medias);
-
-    if (medias.length)
-      await channel?.send(
-        `⏏️ Added ${medias
-          .map(media => media.title)
-          .slice(0, 10)
-          .join(', ')}${
-          medias.length > 10 ? ', ...' : ''
-        } to the front of the queue`
-      );
-
+  async next(): Promise<void> {
     return this.play(true);
   }
 
-  async next(uid?: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
-    await this.play(true);
-    await this.channel?.send('⏩ Next');
-  }
-
-  async pause(uid: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
-    const { player, channel } = this;
-    const paused = player.state.status === AudioPlayerStatus.Paused;
-    if (paused) await player.unpause();
-    else await player.pause(true);
-    await channel?.send(paused ? '⏯️ Resumed' : '⏸️ Paused');
-  }
-
-  toggleLoop(): Promise<void> {
-    this.queue.toggleLoop();
-    return this.send(`🔁 Loop ${this.queue.loop ? 'enabled' : 'disabled'}`);
-  }
-
-  shuffle(): Promise<void> {
-    this.queue.shuffle();
-    return this.send('🔀 Shuffled queue');
-  }
-
-  async move(from: number, to: number, uid?: string): Promise<void> {
+  async move(from: number, to: number): Promise<void> {
     const { queue } = this;
-    if (uid && queue[from]?.requester.uid !== uid) {
-      await this.channel?.send(
-        "The song you are trying to move isn't requested by you, so no."
-      );
-      return;
-    }
-    this.queue.move(from, to);
+    const { length } = queue;
+    from = (from + length) % length;
+    to = (to + length) % length;
+    queue.move(from + 1, to + 1);
     return this.send(`➡️ Moved #${from + 2} to #${to + 2}`);
   }
 
-  async remove(uid: string, index: number): Promise<void> {
-    const { queue } = this;
-    if (queue[index]?.requester.uid !== uid) {
-      await this.channel?.send("This song isn't requested by you, so no.");
-      return;
-    }
-    this.queue.remove(index);
-    return this.send(`✂️ Removed #${index + 2}`);
-  }
-
-  async stop(uid?: string): Promise<void> {
+  async stop(): Promise<void> {
     const { player, connection, queue, onStop } = this;
-    if (
-      uid &&
-      queue.anyNotRequestedBy(uid) &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "There are songs in the queue that aren't requested by you, so no."
-      );
-      return;
-    }
     if (
       connection &&
       connection.state.status !== VoiceConnectionStatus.Destroyed
@@ -365,12 +248,11 @@ export default class Player {
       this.connection =
       this.soundboardCollector =
         undefined;
-    bot.client.user?.setActivity();
     this.queue.changeEmitter.removeAllListeners();
     onStop();
   }
 
-  async soundboard(message: Message): Promise<void> {
+  async soundboard(i: CommandInteraction): Promise<void> {
     const soundsPath = join(__dirname, '../../sounds');
     const fileNames = await readdir(soundsPath);
     const soundNames = fileNames.map(fileName => fileName.replace('.ogg', ''));
@@ -390,7 +272,7 @@ export default class Player {
       rows.push(row);
     }
 
-    this.setChannels(message);
+    this.setChannels(i);
     await this.send({ content: '🎵 Soundboard', components: rows });
     console.log(`🎵 Soundboard created`);
     this.soundboardCollector?.stop();
@@ -450,7 +332,7 @@ export default class Player {
     );
   }
 
-  private async play(skip = false): Promise<void> {
+  async play(skip = false): Promise<void> {
     const { player, queue } = this;
 
     if (this.soundboardCollector) {
@@ -498,212 +380,10 @@ export default class Player {
     player.once(AudioPlayerStatus.Playing, () => {
       this.timestamp = this.connection?.receiver.connectionData.timestamp || 0;
     });
-    bot.client.user?.setActivity(title);
 
     const embed = media.getEmbed().setTitle(`▶️ Playing: ${title}`);
-    addOwnerUsername(embed);
     return this.send({
       embeds: [embed]
     });
-  }
-
-  async queueEmbed(message: Message): Promise<void> {
-    this.setChannels(message);
-    const { channel, connection, queue, timestamp } = this;
-    if (channel)
-      await queue.embed(
-        channel,
-        (connection?.receiver.connectionData.timestamp || 0) - timestamp
-      );
-  }
-
-  songQueueEmbed(n: number): MessageEmbed | void {
-    return this.queue.songEmbed(n - 1);
-  }
-
-  async lyrics(message: Message, query?: string): Promise<void> {
-    this.setChannels(message);
-    const lyrics = await this.getLyrics(query);
-    if (lyrics.length <= 2000) return this.send(lyrics);
-    return this.send({
-      files: [new MessageAttachment(Buffer.from(lyrics), 'lyrics.txt')]
-    });
-  }
-
-  private getLyrics(query?: string) {
-    if (query) return getLyrics(query);
-    const { current } = this.queue;
-    if (current) {
-      const { title } = current;
-      if (current instanceof SpotifyMedia)
-        return getLyrics(`${title} ${current.artist.name}`);
-      return Promise.resolve(getLyrics(title));
-    }
-    return Promise.resolve('No song playing');
-  }
-
-  async playlistGet(
-    { author, member, channel }: Message,
-    name: string
-  ): Promise<void> {
-    const medias = await playlist
-      .get(
-        {
-          uid: author.id,
-          name: member?.nickname || author.username
-        },
-        name
-      )
-      .catch(() => []);
-    const { length } = medias;
-
-    const embed = new MessageEmbed()
-      .setTitle('Tracks')
-      .setColor(color)
-      .setAuthor({
-        name: author.username,
-        iconURL: author.avatarURL() || undefined
-      });
-    const backButton = new MessageButton()
-      .setCustomId('back')
-      .setEmoji('⬅️')
-      .setStyle('PRIMARY');
-    const nextButton = new MessageButton()
-      .setCustomId('next')
-      .setEmoji('➡️')
-      .setStyle('PRIMARY');
-    const row = new MessageActionRow().addComponents(backButton, nextButton);
-
-    let page = 0;
-    const pageSize = 5;
-
-    const generateEmbed = () => {
-      embed.fields = [];
-      backButton.setDisabled(!page);
-      nextButton.setDisabled(page * pageSize + pageSize >= length);
-      embed.setFooter({
-        text: `Page ${page + 1}/${Math.ceil(
-          length / pageSize
-        )}, total: ${length}`
-      });
-      addOwnerUsername(embed);
-
-      for (let i = page * pageSize; i < (page + 1) * pageSize; i++) {
-        const media = medias[i];
-        if (!media) break;
-        const { title, duration } = media;
-        embed.addField(`${i + 1}. ${title}`, `${secondsToTime(duration)}`);
-      }
-    };
-    generateEmbed();
-
-    const message = await channel.send({ embeds: [embed], components: [row] });
-    this.playlistGetCollector?.stop();
-    this.playlistGetCollector = message
-      .createMessageComponentCollector({ time: 60_000 })
-      .on('collect', async i => {
-        const { customId } = i;
-        if (customId === 'back') page--;
-        else if (customId === 'next') page++;
-        generateEmbed();
-        await message.edit({ embeds: [embed], components: [row] });
-        await i.update({ files: [] });
-      });
-  }
-
-  async playlistList({ author, channel }: Message): Promise<void> {
-    const playlists = await playlist.list(author.id);
-    const desc = playlists.join('\n');
-    const embed = new MessageEmbed()
-      .setTitle('Playlists')
-      .setColor(color)
-      .setAuthor({
-        name: author.username,
-        iconURL: author.avatarURL() || undefined
-      })
-      .setDescription(desc.length > 1000 ? `${desc.slice(0, 1000)}...` : desc);
-    addOwnerUsername(embed);
-    await channel.send({ embeds: [embed] });
-  }
-
-  async playlistSave(
-    message: Message,
-    name: string,
-    query?: string
-  ): Promise<void> {
-    const { author, channel } = message;
-    const medias = await this.getMedias(message, query);
-    await playlist.save(author.id, name, medias);
-    await channel.send(`Saved playlist ${name}`);
-  }
-
-  async playlistAdd(
-    message: Message,
-    name: string,
-    query?: string
-  ): Promise<void> {
-    const { author, channel } = message;
-    const medias = await this.getMedias(message, query);
-    await playlist.add(author.id, name, medias);
-    await channel.send(`Added to playlist ${name}`);
-  }
-
-  async playlistLoad(message: Message, names: string[]): Promise<void> {
-    this.setChannels(message);
-    const { author, member } = message;
-    const allMedias: MediaType[] = [];
-    const cache = new Map<string, MediaType[]>();
-    for (const name of names) {
-      let medias = cache.get(name);
-      if (!medias) {
-        medias = await playlist
-          .get(
-            {
-              uid: author.id,
-              name: member?.nickname || author.username
-            },
-            name
-          )
-          .catch(() => []);
-      }
-      allMedias.push(...medias);
-    }
-    this.queue.enqueue(...allMedias);
-    return this.play();
-  }
-
-  async playlistLoads(message: Message, names: string[]): Promise<void> {
-    this.setChannels(message);
-    const { author, member } = message;
-    const allMedias: MediaType[] = [];
-    const cache = new Map<string, MediaType[]>();
-    for (const name of names) {
-      let medias = cache.get(name);
-      if (!medias) {
-        medias = await playlist.get(
-          {
-            uid: author.id,
-            name: member?.nickname || author.username
-          },
-          name
-        );
-      }
-      allMedias.push(...medias);
-    }
-    this.queue.enqueue(...shuffle(allMedias));
-    return this.play();
-  }
-
-  async playlistRemove(
-    { author, channel }: Message,
-    name: string,
-    n?: number
-  ): Promise<void> {
-    await playlist.remove(author.id, name, n);
-    await channel.send(
-      n === undefined
-        ? `Removed playlist ${name}`
-        : `Removed #${n} from playlist ${name}`
-    );
   }
 }

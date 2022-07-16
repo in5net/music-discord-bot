@@ -6,4 +6,5 @@ config({ path: join(__dirname, '../../.env') });
 config({ path: join(__dirname, '../.env') });
 
 const localEnvPath = join(__dirname, '../.env.local');
-if (existsSync(localEnvPath)) config({ path: localEnvPath, override: true });
+if (process.env.NODE_ENV !== 'production' && existsSync(localEnvPath))
+  config({ path: localEnvPath, override: true });
