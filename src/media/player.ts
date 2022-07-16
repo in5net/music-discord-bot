@@ -28,13 +28,13 @@ import { shuffle } from '@limitlesspc/limitless';
 import type { AudioResource } from '@discordjs/voice';
 
 import Queue, { secondsToTime } from './queue';
-import { getLyrics } from '../genius';
+import { getLyrics } from '$services/genius';
 import { SoundCloudMedia, SpotifyMedia, URLMedia, YouTubeMedia } from './media';
 import * as playlist from './playlist';
-import { addOwnerUsername, color } from '../config';
+import { addOwnerUsername, color } from '$services/config';
 // eslint-disable-next-line import/no-cycle
 import bot from '../bot';
-import '../env';
+import '$services/env';
 import type { MediaType } from './media';
 
 export default class Player {

@@ -1,7 +1,7 @@
 import { MessageAttachment } from 'discord.js';
 import wav from '$services/wavstream';
 import woof from '$services/woof';
-import { command } from '$shared/command';
+import { command } from '$services/command';
 
 export default command(
   {

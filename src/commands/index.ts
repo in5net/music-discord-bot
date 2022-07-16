@@ -15,7 +15,7 @@ import lyrics from './lyrics';
 import playlist from './playlist';
 import hz from './hz';
 import playnext from './playnext';
-import type Command from '$shared/command';
+import type Command from '$services/command';
 
 const commands: Command[] = [
   play,

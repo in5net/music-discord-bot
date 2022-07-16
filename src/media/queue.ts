@@ -6,7 +6,7 @@ import type {
   TextChannel
 } from 'discord.js';
 
-import { addOwnerUsername, color } from '../config';
+import { addOwnerUsername, color } from '$services/config';
 import type { MediaType as Media } from './media';
 
 const pageSize = 5;

@@ -1,5 +1,5 @@
 import { Client } from 'genius-lyrics';
-import './env';
+import '$services/env';
 
 const client = new Client(process.env.GENIUS_TOKEN);
 

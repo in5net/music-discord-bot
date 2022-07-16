@@ -1,8 +1,8 @@
 import { MessageEmbed } from 'discord.js';
 import type { ColorResolvable } from 'discord.js';
 
-import { command } from '$shared/command';
-import type Command from '$shared/command';
+import { command } from '$services/command';
+import type Command from '$services/command';
 
 export default function helpCommand(
   title: string,

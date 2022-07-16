@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
-import { command } from '$shared/command';
+import { command } from '$services/command';
 
 export default command(
   {

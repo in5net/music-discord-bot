@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
 import woof from '$services/woof';
-import { command } from '$shared/command';
+import { command } from '$services/command';
 
 export default command(
   {

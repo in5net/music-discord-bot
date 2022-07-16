@@ -9,7 +9,7 @@ import type {
   SpotifyTrack
 } from 'play-dl';
 
-import { Channel, getDetails, search } from '../youtube';
+import { Channel, getDetails, search } from '$services/youtube';
 
 interface MediaJSON {
   title: string;

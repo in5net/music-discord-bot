@@ -1,7 +1,7 @@
 import { youtube } from '@googleapis/youtube';
 import { extractID } from 'play-dl';
 
-import './env';
+import '$services/env';
 
 const api = youtube({
   version: 'v3',
