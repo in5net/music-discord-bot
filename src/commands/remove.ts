@@ -17,7 +17,7 @@ export default command(
     ] as const
   },
   async (message, [nStr]) => {
-    const { guildId, author } = message;
+    const { guildId } = message;
     if (!guildId) return;
     const player = getPlayer(guildId);
 
@@ -30,6 +30,6 @@ export default command(
     if (isNaN(index) || index < 0 || index >= player.queue.length)
       return message.reply(`${woof()}, please provide a valid number`);
 
-    return player.remove(author.id, index);
+    return player.remove(index);
   }
 );

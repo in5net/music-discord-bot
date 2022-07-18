@@ -22,7 +22,7 @@ export default command(
     ] as const
   },
   async (message, [fromStr, toStr]) => {
-    const { guildId, author } = message;
+    const { guildId } = message;
     if (!guildId) return;
     const player = getPlayer(guildId);
 
@@ -44,6 +44,6 @@ export default command(
     )
       return message.reply(`${woof()}, please provide valid numbers`);
 
-    return player.move(from, to, author.id);
+    return player.move(from, to);
   }
 );

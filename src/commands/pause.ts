@@ -18,6 +18,6 @@ export default command(
     if (channel?.type !== 'GUILD_VOICE')
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.pause(message.author.id);
+    return player.pause();
   }
 );

@@ -17,7 +17,7 @@ export default command(
     ] as const
   },
   async (message, [queries]) => {
-    const { guildId, author } = message;
+    const { guildId } = message;
     if (!guildId) return;
     const player = getPlayer(guildId);
 
@@ -25,6 +25,6 @@ export default command(
     if (channel?.type !== 'GUILD_VOICE')
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.playnow(author.id, message, queries.join(' '));
+    return player.playnow(message, queries.join(' '));
   }
 );

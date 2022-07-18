@@ -19,6 +19,6 @@ export default command(
     if (channel?.type !== 'GUILD_VOICE')
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.stop(message.author.id);
+    return player.stop();
   }
 );

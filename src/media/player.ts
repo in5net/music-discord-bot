@@ -240,18 +240,7 @@ export default class Player {
     return this.play();
   }
 
-  async playnow(uid: string, message: Message, query?: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
+  async playnow(message: Message, query?: string): Promise<void> {
     this.setChannels(message);
 
     const { queue, channel } = this;
@@ -272,34 +261,12 @@ export default class Player {
     return this.play(true);
   }
 
-  async next(uid?: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
+  async next(): Promise<void> {
     await this.play(true);
     await this.channel?.send('⏩ Next');
   }
 
-  async pause(uid: string): Promise<void> {
-    if (
-      uid &&
-      this.queue.current?.requester.uid !== uid &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "The currently playing song ain't requested by you, so no."
-      );
-      return;
-    }
-
+  async pause(): Promise<void> {
     const { player, channel } = this;
     const paused = player.state.status === AudioPlayerStatus.Paused;
     if (paused) await player.unpause();
@@ -317,40 +284,18 @@ export default class Player {
     return this.send('🔀 Shuffled queue');
   }
 
-  async move(from: number, to: number, uid?: string): Promise<void> {
-    const { queue } = this;
-    if (uid && queue[from]?.requester.uid !== uid) {
-      await this.channel?.send(
-        "The song you are trying to move isn't requested by you, so no."
-      );
-      return;
-    }
+  async move(from: number, to: number): Promise<void> {
     this.queue.move(from, to);
     return this.send(`➡️ Moved #${from + 2} to #${to + 2}`);
   }
 
-  async remove(uid: string, index: number): Promise<void> {
-    const { queue } = this;
-    if (queue[index]?.requester.uid !== uid) {
-      await this.channel?.send("This song isn't requested by you, so no.");
-      return;
-    }
+  async remove(index: number): Promise<void> {
     this.queue.remove(index);
     return this.send(`✂️ Removed #${index + 2}`);
   }
 
-  async stop(uid?: string): Promise<void> {
+  async stop(): Promise<void> {
     const { player, connection, queue, onStop } = this;
-    if (
-      uid &&
-      queue.anyNotRequestedBy(uid) &&
-      uid !== process.env.MY_DISCORD_ID
-    ) {
-      await this.channel?.send(
-        "There are songs in the queue that aren't requested by you, so no."
-      );
-      return;
-    }
     if (
       connection &&
       connection.state.status !== VoiceConnectionStatus.Destroyed
