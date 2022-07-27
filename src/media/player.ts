@@ -119,7 +119,7 @@ export default class Player {
 
     const queries: string[] = [];
     if (query) {
-      const words = query.split(' ');
+      const words = query.split(' ').filter(Boolean);
       let text = '';
       for (const word of words) {
         const isUrl = Downloader.validate(word);
