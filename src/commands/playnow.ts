@@ -12,7 +12,8 @@ export default command(
       {
         name: 'urls or YouTube searches',
         type: 'string[]',
-        desc: 'The URLs or YouTube searches to play'
+        desc: 'The URLs or YouTube searches to play',
+        optional: true
       }
     ] as const
   },
@@ -25,6 +26,6 @@ export default command(
     if (channel?.type !== 'GUILD_VOICE')
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.playnow(message, queries.join(' '));
+    return player.playnow(message, queries?.join(' '));
   }
 );

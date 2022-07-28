@@ -12,7 +12,8 @@ export default command(
       {
         name: 'urls or YouTube searches',
         type: 'string[]',
-        desc: 'The URLs or YouTube searches to play'
+        desc: 'The URLs or YouTube searches to play',
+        optional: true
       }
     ] as const
   },
