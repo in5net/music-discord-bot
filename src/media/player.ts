@@ -123,7 +123,7 @@ export default class Player {
       let text = '';
       for (const word of words) {
         const isUrl = Downloader.validate(word);
-        if (isUrl || text.endsWith('\n')) {
+        if (isUrl) {
           if (text.trim()) {
             queries.push(text.trim());
             text = '';
@@ -132,7 +132,7 @@ export default class Player {
         } else text += `${word} `;
       }
       if (text) {
-        queries.push(text.trim());
+        queries.push(...text.trim().split('\n'));
         text = '';
       }
     }
