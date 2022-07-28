@@ -10,7 +10,7 @@ export default command(
     desc: 'Plays a song by name or URL',
     args: [
       {
-        name: 'urls or YouTube searches',
+        name: 'query',
         type: 'string[]',
         desc: 'The URLs or YouTube searches to play',
         optional: true

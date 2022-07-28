@@ -10,7 +10,7 @@ export default command(
     desc: 'Adds a song url or YouTube search, and files if given, to the front of the queue and starts playing it',
     args: [
       {
-        name: 'urls or YouTube searches',
+        name: 'query',
         type: 'string[]',
         desc: 'The URLs or YouTube searches to play',
         optional: true

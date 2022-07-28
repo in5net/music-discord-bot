@@ -10,14 +10,14 @@ export default command(
     desc: 'Adds and shuffles the queue',
     args: [
       {
-        name: 'urls or YouTube searches',
+        name: 'query',
         type: 'string[]',
         desc: 'The URLs or YouTube searches to play',
         optional: true
       }
     ] as const
   },
-  async (message, args) => {
+  async (message, [query]) => {
     const { guildId } = message;
     if (!guildId) return;
     const player = getPlayer(guildId);
@@ -26,6 +26,6 @@ export default command(
     if (channel?.type !== 'GUILD_VOICE')
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    return player.add(message, args.join(' '), true);
+    return player.add(message, query?.join(' '), true);
   }
 );
