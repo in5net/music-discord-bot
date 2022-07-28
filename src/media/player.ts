@@ -123,8 +123,8 @@ export default class Player {
       let text = '';
       for (const word of words) {
         const isUrl = Downloader.validate(word);
-        if (isUrl) {
-          if (text) {
+        if (isUrl || word === '\n') {
+          if (text.trim()) {
             queries.push(text.trim());
             text = '';
           }
