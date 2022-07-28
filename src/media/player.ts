@@ -577,7 +577,9 @@ export default class Player {
     query?: string
   ): Promise<void> {
     const { author, channel } = message;
-    const medias = await this.getMedias(message, query);
+    const medias = query
+      ? await this.getMedias(message, query)
+      : this.queue.getMedias();
     await playlist.save(author.id, name, medias);
     await channel.send(`Saved playlist ${name}`);
   }
@@ -588,7 +590,9 @@ export default class Player {
     query?: string
   ): Promise<void> {
     const { author, channel } = message;
-    const medias = await this.getMedias(message, query);
+    const medias = query
+      ? await this.getMedias(message, query)
+      : this.queue.getMedias();
     await playlist.add(author.id, name, medias);
     await channel.send(`Added to playlist ${name}`);
   }
