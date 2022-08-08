@@ -293,9 +293,15 @@ export default class Player {
     return this.send(`➡️ Moved #${from + 2} to #${to + 2}`);
   }
 
-  async remove(index: number): Promise<void> {
-    this.queue.remove(index);
-    return this.send(`✂️ Removed #${index + 2}`);
+  async remove(...indices: number[]): Promise<void> {
+    const { queue } = this;
+    const { length } = queue;
+    indices.forEach(i => queue.remove(i));
+    return this.send(
+      `✂️ Removed ${indices.join(', ')}, total of ${
+        length - queue.length
+      } songs`
+    );
   }
 
   async stop(): Promise<void> {

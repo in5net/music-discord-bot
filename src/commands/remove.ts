@@ -8,16 +8,16 @@ export default command(
   {
     name: 'remove',
     aliases: ['rm'],
-    desc: 'Removes song #n from the queue. You may use `last` to refer to the last song in the queue',
+    desc: 'Removes songs from the queue. You may use `last` to refer to the last song in the queue and `n-m` to specify a range.',
     args: [
       {
         name: 'n',
-        type: 'string',
+        type: 'string[]',
         desc: 'The song number to remove'
       }
     ] as const
   },
-  async (message, [nStr]) => {
+  async (message, [nStrs]) => {
     const { guildId } = message;
     if (!guildId) return;
     const player = getPlayer(guildId);
@@ -26,11 +26,27 @@ export default command(
     if (channel?.type !== ChannelType.GuildVoice)
       return message.reply(`${woof()}, you are not in a voice channel`);
 
-    const index =
-      nStr === 'last' ? player.queue.length - 1 : parseInt(nStr) - 2;
-    if (isNaN(index) || index < 0 || index >= player.queue.length)
-      return message.reply(`${woof()}, please provide a valid number`);
+    const indices: number[] = [];
+    for (const str of nStrs) {
+      if (str === 'last') indices.push(player.queue.length - 1);
+      else if (str.includes('-')) {
+        const [startStr = '1', endStr = '1'] = str.split('-');
+        const start = parseInt(startStr);
+        const end = parseInt(endStr);
+        for (let n = start; n <= end; n++) {
+          indices.push(n - 2);
+        }
+      } else {
+        const n = parseInt(str);
+        indices.push(n - 2);
+      }
+    }
 
-    return player.remove(index);
+    for (const i of indices) {
+      if (isNaN(i) || i < 0 || i >= player.queue.length)
+        return message.reply(`${woof()}, please provide a valid numbers`);
+    }
+
+    return player.remove(...indices);
   }
 );
