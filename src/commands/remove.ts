@@ -41,6 +41,7 @@ export default command(
         indices.push(n - 2);
       }
     }
+    console.log('indices:', indices);
 
     for (const i of indices) {
       if (isNaN(i) || i < 0 || i >= player.queue.length)
