@@ -640,7 +640,8 @@ export default class Player {
       allMedias.push(...medias);
     }
     this.queue.enqueue(...allMedias);
-    return this.play();
+    await message.channel.send(`Loaded ${allMedias.length} songs`);
+    await this.play();
   }
 
   async playlistLoads(message: Message, names: string[]): Promise<void> {
@@ -662,7 +663,8 @@ export default class Player {
       allMedias.push(...medias);
     }
     this.queue.enqueue(...shuffle(allMedias));
-    return this.play();
+    await message.channel.send(`Loaded ${allMedias.length} songs`);
+    await this.play();
   }
 
   async playlistRemove(
