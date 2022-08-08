@@ -13,13 +13,16 @@ import {
 import { Downloader } from '@discord-player/downloader';
 import play from 'play-dl';
 import {
+  ActionRowBuilder,
+  AttachmentBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  ChannelType,
+  ComponentType,
+  EmbedBuilder,
   InteractionCollector,
   Message,
-  MessageActionRow,
-  MessageAttachment,
-  MessageButton,
-  MessageComponentInteraction,
-  MessageEmbed,
   MessageOptions,
   TextChannel,
   VoiceChannel
@@ -73,10 +76,10 @@ export default class Player {
   private message?: Message;
 
   private soundboardCollector:
-    | InteractionCollector<MessageComponentInteraction>
+    | InteractionCollector<ButtonInteraction>
     | undefined;
   private playlistGetCollector:
-    | InteractionCollector<MessageComponentInteraction>
+    | InteractionCollector<ButtonInteraction>
     | undefined;
 
   readonly queue = new Queue();
@@ -91,9 +94,10 @@ export default class Player {
 
   setChannels(message: Message): void {
     const { channel, member } = message;
-    if (channel.type === 'GUILD_TEXT') this.channel = channel;
+    if (channel.type === ChannelType.GuildText) this.channel = channel;
     const voiceChannel = member?.voice.channel;
-    if (voiceChannel?.type === 'GUILD_VOICE') this.voiceChannel = voiceChannel;
+    if (voiceChannel?.type === ChannelType.GuildVoice)
+      this.voiceChannel = voiceChannel;
   }
 
   async getMedias(message: Message, query?: string): Promise<MediaType[]> {
@@ -322,16 +326,17 @@ export default class Player {
     const shuffledNames = shuffle(soundNames).slice(0, 4 * 5);
 
     const buttons = shuffledNames.map(soundName =>
-      new MessageButton()
+      new ButtonBuilder()
         .setCustomId(soundName)
         .setLabel(soundName)
-        .setStyle('PRIMARY')
+        .setStyle(ButtonStyle.Primary)
     );
-    const rows: MessageActionRow[] = [];
+    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
     const columns = 4;
     for (let i = 0; i < buttons.length; i += columns) {
-      const row: MessageActionRow = new MessageActionRow();
-      row.addComponents(buttons.slice(i, i + columns));
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        buttons.slice(i, i + columns)
+      );
       rows.push(row);
     }
 
@@ -340,7 +345,7 @@ export default class Player {
     console.log(`🎵 Soundboard created`);
     this.soundboardCollector?.stop();
     this.soundboardCollector = this.message
-      ?.createMessageComponentCollector()
+      ?.createMessageComponentCollector({ componentType: ComponentType.Button })
       .on('collect', async i => {
         if (i.customId === 'stop') {
           this.soundboardCollector?.stop();
@@ -462,7 +467,7 @@ export default class Player {
       );
   }
 
-  songQueueEmbed(n: number): MessageEmbed | void {
+  songQueueEmbed(n: number) {
     return this.queue.songEmbed(n - 1);
   }
 
@@ -471,7 +476,9 @@ export default class Player {
     const lyrics = await this.getLyrics(query);
     if (lyrics.length <= 2000) return this.send(lyrics);
     return this.send({
-      files: [new MessageAttachment(Buffer.from(lyrics), 'lyrics.txt')]
+      files: [
+        new AttachmentBuilder(Buffer.from(lyrics), { name: 'lyrics.txt' })
+      ]
     });
   }
 
@@ -502,28 +509,31 @@ export default class Player {
       .catch(() => []);
     const { length } = medias;
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle('Tracks')
       .setColor(color)
       .setAuthor({
         name: author.username,
         iconURL: author.avatarURL() || undefined
       });
-    const backButton = new MessageButton()
+    const backButton = new ButtonBuilder()
       .setCustomId('back')
       .setEmoji('⬅️')
-      .setStyle('PRIMARY');
-    const nextButton = new MessageButton()
+      .setStyle(ButtonStyle.Primary);
+    const nextButton = new ButtonBuilder()
       .setCustomId('next')
       .setEmoji('➡️')
-      .setStyle('PRIMARY');
-    const row = new MessageActionRow().addComponents(backButton, nextButton);
+      .setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      backButton,
+      nextButton
+    );
 
     let page = 0;
     const pageSize = 5;
 
     const generateEmbed = () => {
-      embed.fields = [];
+      embed.setFields();
       backButton.setDisabled(!page);
       nextButton.setDisabled(page * pageSize + pageSize >= length);
       embed.setFooter({
@@ -537,7 +547,10 @@ export default class Player {
         const media = medias[i];
         if (!media) break;
         const { title, duration } = media;
-        embed.addField(`${i + 1}. ${title}`, `${secondsToTime(duration)}`);
+        embed.addFields({
+          name: `${i + 1}. ${title}`,
+          value: `${secondsToTime(duration)}`
+        });
       }
     };
     generateEmbed();
@@ -545,7 +558,10 @@ export default class Player {
     const message = await channel.send({ embeds: [embed], components: [row] });
     this.playlistGetCollector?.stop();
     this.playlistGetCollector = message
-      .createMessageComponentCollector({ time: 60_000 })
+      .createMessageComponentCollector({
+        componentType: ComponentType.Button,
+        time: 60_000
+      })
       .on('collect', async i => {
         const { customId } = i;
         if (customId === 'back') page--;
@@ -559,7 +575,7 @@ export default class Player {
   async playlistList({ author, channel }: Message): Promise<void> {
     const playlists = await playlist.list(author.id);
     const desc = playlists.join('\n');
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle('Playlists')
       .setColor(color)
       .setAuthor({

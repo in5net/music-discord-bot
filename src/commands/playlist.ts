@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
 import woof from '$services/woof';
@@ -120,7 +121,7 @@ export default command(
         if (!guildId) return;
         const player = getPlayer(guildId);
 
-        if (message.member?.voice.channel?.type !== 'GUILD_VOICE')
+        if (message.member?.voice.channel?.type !== ChannelType.GuildVoice)
           return message.reply(`${woof()}, you are not in a voice channel`);
 
         if (!names.length) return message.channel.send('Please provide a name');
@@ -145,7 +146,7 @@ export default command(
         if (!guildId) return;
         const player = getPlayer(guildId);
 
-        if (message.member?.voice.channel?.type !== 'GUILD_VOICE')
+        if (message.member?.voice.channel?.type !== ChannelType.GuildVoice)
           return message.reply(`${woof()}, you are not in a voice channel`);
 
         if (!names.length) return message.channel.send('Please provide a name');

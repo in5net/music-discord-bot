@@ -1,5 +1,11 @@
-import { Client, MessageEmbed, Options } from 'discord.js';
-import type { IntentsString, Message } from 'discord.js';
+import {
+  Client,
+  EmbedBuilder,
+  GatewayIntentBits,
+  Message,
+  Options,
+  Partials
+} from 'discord.js';
 
 import type Command from './command';
 import type { ArgV } from './command';
@@ -13,14 +19,14 @@ export default class DiscordBot {
   constructor(
     readonly name: string,
     readonly prefix: string,
-    intents: IntentsString[],
+    intents: GatewayIntentBits[],
     private token?: string
   ) {
     console.log(`⏳ ${name} is starting...`);
     console.time(name);
     this.client = new Client({
       intents,
-      partials: ['CHANNEL'],
+      partials: [Partials.Channel],
       makeCache: Options.cacheWithLimits({
         ApplicationCommandManager: 0,
         BaseGuildEmojiManager: 0,
@@ -61,10 +67,10 @@ export default class DiscordBot {
   }
 
   errorEmbed(error: unknown) {
-    return new MessageEmbed()
+    return new EmbedBuilder()
       .setTitle('Error')
       .setDescription(`${error}`)
-      .setColor('RED');
+      .setColor('Red');
   }
 
   async run() {
@@ -177,7 +183,7 @@ export default class DiscordBot {
               throw new Error(`Argument \`${arg.name}\` is required`);
             parsedArgs.push(value);
           }
-          await command.exec(message, parsedArgs, client);
+          await command.exec(message, parsedArgs as ArgV[], client);
         }
       } catch (error) {
         try {

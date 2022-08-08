@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import type { ColorResolvable } from 'discord.js';
 
 import { command } from '$services/command';
@@ -28,7 +28,7 @@ export default function helpCommand(
       if (!args)
         return channel.send({
           embeds: [
-            new MessageEmbed()
+            new EmbedBuilder()
               .setTitle(`${title} Commands`)
               .setDescription(
                 manual
@@ -72,16 +72,18 @@ export default function helpCommand(
           `No help found for command \`${commands.join(' ')}\``
         );
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setTitle(`${title} Help: ${commands.join(' ')}`)
         .setDescription(commandManual.desc)
         .setColor(color)
-        .addField('Usage', `\`${prefix}${usage.join(' ')}\``);
+        .addFields({ name: 'Usage', value: `\`${prefix}${usage.join(' ')}\`` });
       if (commandManual.subcommands)
-        embed.addField(
-          'Subcommands',
-          commandManual.subcommands.map(({ name }) => `\`${name}\``).join(', ')
-        );
+        embed.addFields({
+          name: 'Subcommands',
+          value: commandManual.subcommands
+            .map(({ name }) => `\`${name}\``)
+            .join(', ')
+        });
       return channel.send({ embeds: [embed] });
     }
   );

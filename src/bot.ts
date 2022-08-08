@@ -1,4 +1,6 @@
 /* eslint-disable import/no-cycle */
+import { IntentsBitField } from 'discord.js';
+
 import '$services/env';
 import DiscordBot from '$services/bot';
 import commands from './commands';
@@ -9,7 +11,13 @@ import type Command from '$services/command';
 const bot = new DiscordBot(
   process.env.NAME || '',
   '-',
-  ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES', 'DIRECT_MESSAGES'],
+  [
+    IntentsBitField.Flags.Guilds,
+    IntentsBitField.Flags.GuildMessages,
+    IntentsBitField.Flags.GuildVoiceStates,
+    IntentsBitField.Flags.DirectMessages,
+    IntentsBitField.Flags.MessageContent
+  ],
   process.env.TOKEN
 ).addCommands([help as unknown as Command, ...commands]);
 bot.client.on('voiceStateUpdate', oldState => {

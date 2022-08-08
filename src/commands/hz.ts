@@ -1,4 +1,4 @@
-import { MessageAttachment } from 'discord.js';
+import { AttachmentBuilder } from 'discord.js';
 import wav from '$services/wavstream';
 import woof from '$services/woof';
 import { command } from '$services/command';
@@ -31,7 +31,7 @@ export default command(
 
     const stream = wav(hz, duration);
     return message.channel.send({
-      files: [new MessageAttachment(stream, `${hz}.wav`)]
+      files: [new AttachmentBuilder(stream, { name: `${hz}.wav` })]
     });
   }
 );

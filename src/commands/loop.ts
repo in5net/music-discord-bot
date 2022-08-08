@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord.js';
 // eslint-disable-next-line import/no-cycle
 import { getPlayer } from '../players';
 import woof from '$services/woof';
@@ -15,7 +16,7 @@ export default command(
     const player = getPlayer(guildId);
 
     const channel = message.member?.voice.channel;
-    if (channel?.type !== 'GUILD_VOICE')
+    if (channel?.type !== ChannelType.GuildVoice)
       return message.reply(`${woof()}, you are not in a voice channel`);
 
     return player.toggleLoop();

@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
 import type {
@@ -33,9 +33,9 @@ abstract class Media {
 
   abstract toJSON(): MediaJSON;
 
-  getEmbed(): MessageEmbed {
+  getEmbed() {
     const { title, requester, iconURL } = this;
-    return new MessageEmbed().setTitle(title).setFooter({
+    return new EmbedBuilder().setTitle(title).setFooter({
       text: `Requested by ${requester.name}`,
       iconURL
     });
@@ -128,7 +128,7 @@ ${title} (${url})
     const { description, thumbnail, channel, url, channelURL } = this;
     return super
       .getEmbed()
-      .setColor('RED')
+      .setColor('Red')
       .setURL(url)
       .setDescription(
         description.length > 1000
@@ -420,12 +420,13 @@ ${title} (${url})
 
   getEmbed() {
     const { thumbnail, artist, album, url, artistURL, albumURL } = this;
-    const embed = super.getEmbed().setColor('GREEN').setURL(url).setAuthor({
+    const embed = super.getEmbed().setColor('Green').setURL(url).setAuthor({
       name: artist.name,
       url: artistURL
     });
     if (thumbnail) embed.setThumbnail(thumbnail);
-    if (album) embed.addField('Album', `[${album.name}](${albumURL})`);
+    if (album)
+      embed.addFields({ name: 'Album', value: `[${album.name}](${albumURL})` });
     return embed;
   }
 
@@ -572,7 +573,7 @@ ${title} (${url})
     const { user, thumbnail, url } = this;
     const embed = super
       .getEmbed()
-      .setColor('ORANGE')
+      .setColor('Orange')
       .setURL(url)
       .setAuthor({
         name: user.name,
@@ -678,7 +679,7 @@ ${title} (${url})`);
   }
 
   getEmbed() {
-    return super.getEmbed().setColor('BLUE').setURL(this.url);
+    return super.getEmbed().setColor('Blue').setURL(this.url);
   }
 
   static async fromURL(
@@ -738,7 +739,7 @@ ${title} (${path})`);
   }
 
   getEmbed() {
-    return super.getEmbed().setColor('BLURPLE').setURL(this.path);
+    return super.getEmbed().setColor('Blurple').setURL(this.path);
   }
 }
 

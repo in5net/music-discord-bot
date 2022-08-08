@@ -1,8 +1,12 @@
 import EventEmitter from 'node:events';
-import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
-import type {
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  ComponentType,
+  EmbedBuilder,
   InteractionCollector,
-  MessageComponentInteraction,
   TextChannel
 } from 'discord.js';
 
@@ -14,7 +18,7 @@ const pageSize = 5;
 export default class Queue extends Array<Media> {
   current?: Media;
   loop = false;
-  collector: InteractionCollector<MessageComponentInteraction> | undefined;
+  collector: InteractionCollector<ButtonInteraction> | undefined;
   changeEmitter = new EventEmitter();
 
   get size(): number {
@@ -83,23 +87,26 @@ export default class Queue extends Array<Media> {
   }
 
   async embed(channel: TextChannel, timestamp: number) {
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle(`Queue ${this.loop ? '🔁' : ''}`)
       .setColor(color);
-    const backButton = new MessageButton()
+    const backButton = new ButtonBuilder()
       .setCustomId('back')
       .setEmoji('⬅️')
-      .setStyle('PRIMARY');
-    const nextButton = new MessageButton()
+      .setStyle(ButtonStyle.Primary);
+    const nextButton = new ButtonBuilder()
       .setCustomId('next')
       .setEmoji('➡️')
-      .setStyle('PRIMARY');
-    const row = new MessageActionRow().addComponents(backButton, nextButton);
+      .setStyle(ButtonStyle.Primary);
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      backButton,
+      nextButton
+    );
 
     let page = 0;
 
     const generateEmbed = () => {
-      embed.fields = [];
+      embed.setFields();
       backButton.setDisabled(!page);
       nextButton.setDisabled(page * pageSize + pageSize >= this.length);
       embed.setFooter({
@@ -112,16 +119,21 @@ export default class Queue extends Array<Media> {
       const { current } = this;
       if (current) {
         const { title, duration } = current;
-        embed.addField(
-          `▶️ ${title}`,
-          `${secondsToTime(timestamp / 50_000)}/${secondsToTime(duration)}`
-        );
+        embed.addFields({
+          name: `▶️ ${title}`,
+          value: `${secondsToTime(timestamp / 50_000)}/${secondsToTime(
+            duration
+          )}`
+        });
       }
       for (let i = page * pageSize; i < (page + 1) * pageSize; i++) {
         const media = this[i];
         if (!media) break;
         const { title, duration } = media;
-        embed.addField(`${i + 2}. ${title}`, `${secondsToTime(duration)}`);
+        embed.addFields({
+          name: `${i + 2}. ${title}`,
+          value: `${secondsToTime(duration)}`
+        });
       }
     };
     generateEmbed();
@@ -145,7 +157,7 @@ export default class Queue extends Array<Media> {
 
     this.collector?.stop();
     this.collector = message
-      .createMessageComponentCollector()
+      .createMessageComponentCollector({ componentType: ComponentType.Button })
       .on('collect', async i => {
         const { customId } = i;
         if (customId === 'back') page--;
@@ -155,7 +167,7 @@ export default class Queue extends Array<Media> {
       });
   }
 
-  songEmbed(index: number): MessageEmbed | void {
+  songEmbed(index: number) {
     const media = index ? this[index - 1] : this.current;
     if (!media) return;
     const embed = media.getEmbed();

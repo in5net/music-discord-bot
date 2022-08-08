@@ -14,7 +14,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  counts Json?
+  counts      Json?
+  lastDalleAt DateTime?
+
+  playlists Playlist[]
 }
 
 model Playlist {
@@ -22,11 +25,13 @@ model Playlist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  user  User   @relation(fields: [uid], references: [id])
   uid   String @db.Char(18)
   name  String @db.VarChar(100)
   songs Json
 
   @@unique([uid, name])
+  @@index([uid])
 }
 
 model Ratio {
@@ -58,4 +63,8 @@ model Chicken {
 
 model SpeechBubble {
   name String @id @db.VarChar(100)
+}
+
+model HopOn {
+  id String @id
 }
