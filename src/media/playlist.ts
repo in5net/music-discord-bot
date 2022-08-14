@@ -47,7 +47,8 @@ export async function get(
           return URLMedia.fromJSON(mediaJSON, requester);
       }
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
     throw new Error('Playlist not found');
   }
 }
@@ -150,7 +151,8 @@ export async function remove(
         }
       });
     }
-  } catch {
+  } catch (error) {
+    console.error(error);
     throw new Error('Playlist not found');
   }
 }

@@ -22,12 +22,12 @@ export async function search(query: string): Promise<Video> {
 }
 
 export interface Video {
-  title: string;
-  description: string;
-  thumbnail: string;
-  duration: number;
-  channel: Channel;
   id: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  duration: number;
+  channel?: Channel;
 }
 export async function getDetails(id: string): Promise<Video> {
   const videoRes = await api.videos.list({
@@ -37,20 +37,21 @@ export async function getDetails(id: string): Promise<Video> {
   });
   const videoItem = videoRes.data.items?.[0];
   const title = videoItem?.snippet?.title || '';
-  const description = videoItem?.snippet?.description || '';
-  const thumbnail = videoItem?.snippet?.thumbnails?.default?.url || '';
+  const description = videoItem?.snippet?.description || undefined;
+  const thumbnail = videoItem?.snippet?.thumbnails?.default?.url || undefined;
   const duration = videoItem?.contentDetails?.duration || '';
   console.log('YouTube duration str:', duration);
 
-  const channel = await getChannel(videoItem?.snippet?.channelId || '');
+  const channelId = videoItem?.snippet?.channelId;
+  const channel = channelId ? await getChannel(channelId) : undefined;
 
   return {
+    id,
     title,
     description,
     thumbnail,
     duration: durationStr2Sec(duration),
-    channel,
-    id
+    channel
   };
 }
 

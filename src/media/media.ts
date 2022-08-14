@@ -46,22 +46,22 @@ interface YouTubeJSON extends MediaJSON {
   type: 'youtube';
   id: string;
   time?: number;
-  description: string;
-  thumbnail: string;
-  channel: Channel;
+  description?: string;
+  thumbnail?: string;
+  channel?: Channel;
 }
 export class YouTubeMedia extends Media {
   constructor(
-    public id: string,
-    public description: string,
-    public thumbnail: string,
-    public channel: Channel,
-    title: string,
-    duration: number,
     requester: {
       uid: string;
       name: string;
     },
+    public id: string,
+    title: string,
+    duration: number,
+    public description?: string,
+    public thumbnail?: string,
+    public channel?: Channel,
     public time?: number
   ) {
     super(title, duration, requester);
@@ -78,14 +78,14 @@ export class YouTubeMedia extends Media {
   }
 
   get channelURL(): string {
-    return `https://www.youtube.com/channel/${this.channel.id}`;
+    return `https://www.youtube.com/channel/${this.channel?.id}`;
   }
 
   log() {
     const { title, channel, url } = this;
     console.log(chalk`📺 {red [You{white Tube}]}
 ${title} (${url})
-* channel: ${channel.title}`);
+* channel: ${channel?.title || 'unknown'}`);
   }
 
   toString(): string {
@@ -113,34 +113,34 @@ ${title} (${url})
     }
   ): YouTubeMedia {
     return new YouTubeMedia(
+      requester,
       id,
+      title,
+      duration,
       description,
       thumbnail,
       channel,
-      title,
-      duration,
-      requester,
       time
     );
   }
 
   getEmbed() {
     const { description, thumbnail, channel, url, channelURL } = this;
-    return super
-      .getEmbed()
-      .setColor('Red')
-      .setURL(url)
-      .setDescription(
-        description.length > 1000
-          ? `${description.slice(0, 1000)}...`
-          : description
-      )
-      .setThumbnail(thumbnail)
-      .setAuthor({
+    const embed = super.getEmbed().setColor('Red').setURL(url);
+    if (thumbnail) embed.setThumbnail(thumbnail);
+    if (channel)
+      embed.setAuthor({
         name: channel.title,
         url: channelURL,
         iconURL: channel.thumbnail
       });
+    if (description)
+      embed.setDescription(
+        description.length > 1000
+          ? `${description.slice(0, 1000)}...`
+          : description
+      );
+    return embed;
   }
 
   static async fromId(
@@ -154,15 +154,16 @@ ${title} (${url})
       const { title, description, thumbnail, duration, channel } =
         await getDetails(id);
       return new YouTubeMedia(
+        requester,
         id,
-        description,
-        thumbnail,
-        channel,
         title,
         duration,
-        requester
+        description,
+        thumbnail,
+        channel
       );
-    } catch {
+    } catch (error) {
+      console.error(error);
       try {
         const {
           video_details: {
@@ -175,32 +176,25 @@ ${title} (${url})
           }
         } = await play.video_basic_info(id);
         return new YouTubeMedia(
+          requester,
           videoId,
+          title,
+          duration,
           description,
           thumbnail?.url || '',
           {
             id: channel?.id || '',
             title: channel?.name || '',
             thumbnail: channel?.iconURL() || ''
-          },
-          title,
-          duration,
-          requester
+          }
         );
-      } catch {
-        return new YouTubeMedia(
-          id,
-          '',
-          '',
-          {
-            id: '',
-            title: '',
-            thumbnail: ''
-          },
-          '',
-          NaN,
-          requester
-        );
+      } catch (error) {
+        console.error(error);
+        return new YouTubeMedia(requester, id, '', NaN, '', '', {
+          id: '',
+          title: '',
+          thumbnail: ''
+        });
       }
     }
   }
@@ -231,15 +225,16 @@ ${title} (${url})
       const { title, description, thumbnail, duration, channel, id } =
         await search(query);
       return new YouTubeMedia(
+        requester,
         id,
-        description,
-        thumbnail,
-        channel,
         title,
         duration,
-        requester
+        description,
+        thumbnail,
+        channel
       );
-    } catch {
+    } catch (error) {
+      console.error(error);
       const [video] = await play.search(query, { limit: 1 });
       if (!video) return Promise.reject();
       const {
@@ -251,17 +246,17 @@ ${title} (${url})
         channel
       } = video;
       return new YouTubeMedia(
+        requester,
         videoId,
+        title,
+        duration,
         description,
         thumbnail?.url || '',
         {
           id: channel?.id || '',
           title: channel?.name || '',
           thumbnail: channel?.iconURL() || ''
-        },
-        title,
-        duration,
-        requester
+        }
       );
     }
   }
@@ -285,17 +280,17 @@ ${title} (${url})
         channel
       }) =>
         new YouTubeMedia(
+          requester,
           videoId,
+          title,
+          duration,
           description,
           thumbnail?.url || '',
           {
             id: channel?.id || '',
             title: channel?.name || '',
             thumbnail: channel?.iconURL() || ''
-          },
-          title,
-          duration,
-          requester
+          }
         )
     );
   }
@@ -450,7 +445,8 @@ ${title} (${url})
     try {
       const video = await search(`${name} ${artist?.name || ''}`);
       ytId = video.id;
-    } catch {
+    } catch (error) {
+      console.error(error);
       const [video] = await play.search(`${name} ${artist?.name || ''}`, {
         limit: 1
       });

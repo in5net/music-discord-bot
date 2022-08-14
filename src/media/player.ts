@@ -165,7 +165,8 @@ export default class Player {
           const media = await YouTubeMedia.fromURL(query, requester);
           medias.push(media);
           mediasCache.set(query, [media]);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid YouTube video url');
         }
       } else if (play.sp_validate(query) === 'track') {
@@ -173,7 +174,8 @@ export default class Player {
           const media = await SpotifyMedia.fromURL(query, requester);
           medias.push(media);
           mediasCache.set(query, [media]);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid Spotify song url');
         }
       } else if (
@@ -183,7 +185,8 @@ export default class Player {
           const songs = await SpotifyMedia.fromListURL(query, requester);
           medias.push(...songs);
           mediasCache.set(query, songs);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid Spotify album/playlist url');
         }
       } else if ((await play.so_validate(query)) === 'track') {
@@ -191,7 +194,8 @@ export default class Player {
           const media = await SoundCloudMedia.fromURL(query, requester);
           medias.push(media);
           mediasCache.set(query, [media]);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid SoundCloud song url');
         }
       } else if ((await play.so_validate(query)) === 'playlist') {
@@ -199,7 +203,8 @@ export default class Player {
           const medias = await SoundCloudMedia.fromListURL(query, requester);
           medias.push(...medias);
           mediasCache.set(query, medias);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid SoundCloud playlist url');
         }
       } else if (Downloader.validate(query)) {
@@ -207,7 +212,8 @@ export default class Player {
           const media = await URLMedia.fromURL(query, requester);
           medias.push(media);
           mediasCache.set(query, [media]);
-        } catch {
+        } catch (error) {
+          console.error(error);
           await this.send('🚫 Invalid song url');
         }
       } else {
@@ -215,7 +221,8 @@ export default class Player {
           const media = await YouTubeMedia.fromSearch(query, requester);
           medias.push(media);
           mediasCache.set(query, [media]);
-        } catch {
+        } catch (error) {
+          console.error(error);
           this.send('🚫 Invalid YouTube query');
         }
       }

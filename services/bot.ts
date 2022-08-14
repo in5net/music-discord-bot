@@ -186,13 +186,14 @@ export default class DiscordBot {
           await command.exec(message, parsedArgs as ArgV[], client);
         }
       } catch (error) {
+        console.error(error);
         try {
           await channel.send({
             embeds: [
               this.errorEmbed(error instanceof Error ? error.message : error)
             ]
           });
-        } catch {
+        } catch (error) {
           console.error('Failed to send error:', error);
         }
       }
