@@ -131,8 +131,8 @@ ${title} (${url})
     if (channel)
       embed.setAuthor({
         name: channel.title,
-        url: channelURL,
-        iconURL: channel.thumbnail
+        url: channelURL || undefined,
+        iconURL: channel.thumbnail || undefined
       });
     if (description)
       embed.setDescription(

@@ -399,8 +399,6 @@ export default class Player {
         this.connection = joinVoiceChannel({
           channelId: voiceChannel.id,
           guildId: voiceChannel.guild.id,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           adapterCreator: voiceChannel.guild.voiceAdapterCreator
         });
         this.connection
@@ -463,11 +461,15 @@ export default class Player {
     });
     bot.client.user?.setActivity(title);
 
-    const embed = media.getEmbed().setTitle(`▶️ Playing: ${title}`);
-    addOwnerUsername(embed);
-    return this.send({
-      embeds: [embed]
-    });
+    try {
+      const embed = media.getEmbed().setTitle(`▶️ Playing: ${title}`);
+      addOwnerUsername(embed);
+      return await this.send({
+        embeds: [embed]
+      });
+    } catch (error) {
+      console.error('Error creating embed:', error);
+    }
   }
 
   async queueEmbed(message: Message): Promise<void> {
