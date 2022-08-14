@@ -14,8 +14,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  counts      Json?
-  lastDalleAt DateTime?
+  counts   Json?
+  creditAt DateTime?
 
   playlists Playlist[]
 }
