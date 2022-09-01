@@ -10,7 +10,7 @@ import {
   VoiceConnection,
   VoiceConnectionStatus
 } from '@discordjs/voice';
-import { Downloader } from '@discord-player/downloader';
+import got from 'got';
 import play from 'play-dl';
 import {
   ActionRowBuilder,
@@ -39,6 +39,9 @@ import { addOwnerUsername, color } from '$services/config';
 import bot from '../bot';
 import '$services/env';
 import type { MediaType } from './media';
+
+const URL_REGEX =
+  /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/i;
 
 export default class Player {
   private player = createAudioPlayer({
@@ -123,7 +126,7 @@ export default class Player {
       const words = query.split(' ').filter(Boolean);
       let text = '';
       for (const word of words) {
-        const isUrl = Downloader.validate(word);
+        const isUrl = URL_REGEX.test(word);
         if (isUrl) {
           if (text.trim()) {
             queries.push(text.trim());
@@ -204,7 +207,7 @@ export default class Player {
           console.error(error);
           await this.send('🚫 Invalid SoundCloud playlist url');
         }
-      } else if (Downloader.validate(query)) {
+      } else if (URL_REGEX.test(query)) {
         try {
           const media = await URLMedia.fromURL(query, requester);
           medias.push(media);
@@ -443,8 +446,8 @@ export default class Player {
       resource = createAudioResource(stream.stream, { inputType: stream.type });
       console.log(`▶️ Playing ${media.url}`);
     } else if (media instanceof URLMedia) {
-      const stream = Downloader.download(media.url);
-      resource = createAudioResource(stream);
+      const steam = await got.stream(media.url);
+      resource = createAudioResource(steam);
       console.log(`▶️ Playing ${media.url}`);
     } else {
       resource = createAudioResource(media.path);
