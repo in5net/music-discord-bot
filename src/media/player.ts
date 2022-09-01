@@ -50,7 +50,7 @@ export default class Player {
     }
   })
     .on(AudioPlayerStatus.Idle, async () => {
-      if (this.soundboardCollector || this.loading) return;
+      if (this.soundboardCollector) return;
 
       try {
         if (this.queue.size) {
@@ -83,7 +83,6 @@ export default class Player {
 
   readonly queue = new Queue();
   private timestamp = 0;
-  private loading = false;
 
   constructor(private onStop: () => void) {}
 
@@ -456,10 +455,9 @@ export default class Player {
 
     player.play(resource);
     this.timestamp = 0;
-    this.loading = true;
+
     player.once(AudioPlayerStatus.Playing, () => {
       this.timestamp = this.connection?.receiver.connectionData.timestamp || 0;
-      this.loading = false;
     });
     bot.client.user?.setActivity(title);
 
