@@ -27,7 +27,7 @@ import {
   TextChannel,
   VoiceChannel
 } from 'discord.js';
-import { shuffle } from '@limitlesspc/limitless';
+import { shuffle } from '@in5net/limitless';
 import type { AudioResource } from '@discordjs/voice';
 
 import Queue, { secondsToTime } from './queue';
