@@ -276,6 +276,28 @@ export default class Player {
     await this.channel?.send('⏩ Next');
   }
 
+  async seek(message: Message, time: number) {
+    const {
+      player,
+      queue: { current }
+    } = this;
+    if (!current) return message.channel.send('No song is playing');
+    if (!(current instanceof YouTubeMedia))
+      return message.channel.send(
+        'This command is only available for YouTube songs'
+      );
+
+    if (play.is_expired()) await play.refreshToken();
+
+    const stream = await play.stream(current.url, {
+      seek: time
+    });
+    const resource = createAudioResource(stream.stream, {
+      inputType: stream.type
+    });
+    player.play(resource);
+  }
+
   async pause(): Promise<void> {
     const { player, channel } = this;
     const paused = player.state.status === AudioPlayerStatus.Paused;

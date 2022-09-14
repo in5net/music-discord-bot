@@ -9,6 +9,7 @@ import playshuffle from './playshuffle';
 import loop from './loop';
 import move from './move';
 import remove from './remove';
+import seek from './seek';
 import stop from './stop';
 import soundboard from './soundboard';
 import lyrics from './lyrics';
@@ -28,6 +29,7 @@ const commands: Command[] = [
   loop,
   move,
   remove,
+  seek,
   stop,
   soundboard,
   lyrics,

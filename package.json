@@ -10,7 +10,7 @@
   "dependencies": {
     "@discordjs/voice": "0.11.0",
     "@googleapis/youtube": "6.0.0",
-    "@in5net/limitless": "^0.0.4",
+    "@in5net/limitless": "^0.0.7",
     "@prisma/client": "4.3.1",
     "chalk": "4",
     "discord.js": "14.3.0",

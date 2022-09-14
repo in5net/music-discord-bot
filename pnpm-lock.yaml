@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@discordjs/voice': 0.11.0
   '@googleapis/youtube': 6.0.0
-  '@in5net/limitless': ^0.0.4
+  '@in5net/limitless': ^0.0.7
   '@prisma/client': 4.3.1
   '@swc-node/register': ^1.5.1
   '@types/node': 18.7.18
@@ -28,7 +28,7 @@ specifiers:
 dependencies:
   '@discordjs/voice': 0.11.0_ffmpeg-static@5.1.0
   '@googleapis/youtube': 6.0.0
-  '@in5net/limitless': 0.0.4
+  '@in5net/limitless': 0.0.7
   '@prisma/client': 4.3.1_prisma@4.3.1
   chalk: 4.1.2
   discord.js: 14.3.0
@@ -162,8 +162,8 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
 
-  /@in5net/limitless/0.0.4:
-    resolution: {integrity: sha512-w67EhTFE0XfUDPuwEb/T24UuOxqH85aDKBTmeVnmj9BS5sExV4WEhcEoj/+90PGZfqqCNx6FBesG6snE7JoudQ==}
+  /@in5net/limitless/0.0.7:
+    resolution: {integrity: sha512-ceDFOCExYhEFZjYXG3m0bUuVS5c64SMk9Qk4V3htB/d9RL4u6HCVBvb6g2LCDiMG2oMB30AhbPAUmmG/ESs6yA==}
     dependencies:
       '@discordjs/rest': 1.1.0
       cheerio: 1.0.0-rc.12
