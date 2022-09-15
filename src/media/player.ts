@@ -276,7 +276,7 @@ export default class Player {
     await this.channel?.send('⏩ Next');
   }
 
-  async seek(message: Message, time: number) {
+  async seek(message: Message, seconds: number) {
     const {
       player,
       queue: { current }
@@ -290,12 +290,12 @@ export default class Player {
     if (play.is_expired()) await play.refreshToken();
 
     const stream = await play.stream(current.url, {
-      seek: time
+      seek: seconds
     });
     const resource = createAudioResource(stream.stream, {
       inputType: stream.type
     });
-    player.play(resource);
+    return player.play(resource);
   }
 
   async pause(): Promise<void> {
