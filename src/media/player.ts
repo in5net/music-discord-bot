@@ -37,7 +37,6 @@ import * as playlist from './playlist';
 import { addOwnerUsername, color } from '$services/config';
 // eslint-disable-next-line import/no-cycle
 import bot from '../bot';
-import '$services/env';
 import type { MediaType } from './media';
 
 const URL_REGEX =

@@ -1,8 +1,6 @@
 import { youtube } from '@googleapis/youtube';
 import { extractID } from 'play-dl';
 
-import '$services/env';
-
 const api = youtube({
   version: 'v3',
   auth: process.env.GOOGLE_APIS_KEY
