@@ -9,7 +9,12 @@ import type {
   SpotifyTrack
 } from 'play-dl';
 
-import { Channel, getDetails, search } from '$services/youtube';
+import {
+  Channel,
+  getChannelVideos,
+  getDetails,
+  search
+} from '$services/youtube';
 
 interface MediaJSON {
   title: string;
@@ -290,6 +295,39 @@ ${title} (${url})
             id: channel?.id || '',
             title: channel?.name || '',
             thumbnail: channel?.iconURL() || ''
+          }
+        )
+    );
+  }
+
+  static async fromChannelId(
+    id: string,
+    requester: {
+      uid: string;
+      name: string;
+    }
+  ): Promise<YouTubeMedia[]> {
+    const videos = await getChannelVideos(id);
+    return videos.map(
+      ({
+        id: videoId = '',
+        title = '',
+        description = '',
+        duration,
+        thumbnail,
+        channel
+      }) =>
+        new YouTubeMedia(
+          requester,
+          videoId,
+          title,
+          duration,
+          description,
+          thumbnail || '',
+          {
+            id: channel?.id || '',
+            title: channel?.title || '',
+            thumbnail: channel?.thumbnail || ''
           }
         )
     );

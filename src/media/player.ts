@@ -39,6 +39,8 @@ import { addOwnerUsername, color } from '$services/config';
 import bot from '../bot';
 import type { MediaType } from './media';
 
+const YOUTUBE_CHANNEL_REGEX =
+  /https?:\/\/(?:www\.)?youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
 const URL_REGEX =
   /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/i;
 
@@ -166,6 +168,16 @@ export default class Player {
         } catch (error) {
           console.error(error);
           await this.send('🚫 Invalid YouTube video url');
+        }
+      } else if (YOUTUBE_CHANNEL_REGEX.test(query)) {
+        try {
+          const id = YOUTUBE_CHANNEL_REGEX.exec(query)?.[1] || '';
+          const videos = await YouTubeMedia.fromChannelId(id, requester);
+          medias.push(...videos);
+          mediasCache.set(query, videos);
+        } catch (error) {
+          console.error(error);
+          await this.send('🚫 Invalid YouTube channel url');
         }
       } else if (play.sp_validate(query) === 'track') {
         try {

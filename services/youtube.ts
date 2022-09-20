@@ -114,6 +114,35 @@ export async function getChannel(id: string): Promise<Channel> {
   };
 }
 
+export async function getChannelVideos(id: string): Promise<Video[]> {
+  const channel = await getChannel(id);
+
+  const videos: Video[] = [];
+  let nextPageToken: string | null | undefined;
+  do {
+    const playlistRes = await api.search.list({
+      channelId: id,
+      part: ['snippet'],
+      order: 'date',
+      maxResults: 50,
+      pageToken: nextPageToken || undefined
+    });
+    const pageVideos = await Promise.all(
+      playlistRes.data.items?.map(async item => ({
+        title: item.snippet?.title || '',
+        description: item.snippet?.description || '',
+        thumbnail: item.snippet?.thumbnails?.default?.url || '',
+        duration: NaN,
+        channel,
+        id: item.id?.videoId || ''
+      })) || []
+    );
+    videos.push(...pageVideos);
+    ({ nextPageToken } = playlistRes.data);
+  } while (nextPageToken && videos.length < 100);
+  return videos;
+}
+
 if (require.main === module) {
   (async () => {
     const url =
