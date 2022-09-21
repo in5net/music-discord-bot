@@ -40,7 +40,7 @@ import bot from '../bot';
 import type { MediaType } from './media';
 
 const YOUTUBE_CHANNEL_REGEX =
-  /https?:\/\/(?:www\.)?youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
+  /https?:\/\/(?:www\.)?youtube\.com\/(channel|c)\/([a-zA-Z0-9_-]+)/;
 const URL_REGEX =
   /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/i;
 
@@ -171,7 +171,7 @@ export default class Player {
         }
       } else if (YOUTUBE_CHANNEL_REGEX.test(query)) {
         try {
-          const id = YOUTUBE_CHANNEL_REGEX.exec(query)?.[1] || '';
+          const id = YOUTUBE_CHANNEL_REGEX.exec(query)?.[2] || '';
           const videos = await YouTubeMedia.fromChannelId(id, requester);
           medias.push(...videos);
           mediasCache.set(query, videos);
