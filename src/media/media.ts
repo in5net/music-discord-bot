@@ -1,6 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
+import { Innertube } from 'youtubei.js';
 import type {
   SoundCloudPlaylist,
   SoundCloudTrack,
@@ -9,6 +10,7 @@ import type {
   SpotifyTrack
 } from 'play-dl';
 
+import Video from 'youtubei.js/dist/src/parser/classes/Video';
 import {
   Channel,
   getChannelVideos,
@@ -307,30 +309,62 @@ ${title} (${url})
       name: string;
     }
   ): Promise<YouTubeMedia[]> {
-    const videos = await getChannelVideos(id);
-    return videos.map(
-      ({
-        id: videoId = '',
-        title = '',
-        description = '',
-        duration,
-        thumbnail,
-        channel
-      }) =>
-        new YouTubeMedia(
-          requester,
-          videoId,
-          title,
+    try {
+      const videos = await getChannelVideos(id);
+      return videos.map(
+        ({
+          id: videoId = '',
+          title = '',
+          description = '',
           duration,
-          description,
-          thumbnail || '',
-          {
-            id: channel?.id || '',
-            title: channel?.title || '',
-            thumbnail: channel?.thumbnail || ''
-          }
-        )
-    );
+          thumbnail,
+          channel
+        }) =>
+          new YouTubeMedia(
+            requester,
+            videoId,
+            title,
+            duration,
+            description,
+            thumbnail || '',
+            {
+              id: channel?.id || '',
+              title: channel?.title || '',
+              thumbnail: channel?.thumbnail || ''
+            }
+          )
+      );
+    } catch {
+      const youtube = await Innertube.create();
+      const channel = await youtube.getChannel(id);
+      const { videos } = await channel.getVideos();
+      const medias: YouTubeMedia[] = [];
+      for (const video of videos) {
+        if (video.is(Video)) {
+          const {
+            title,
+            duration: { seconds },
+            description,
+            best_thumbnail
+          } = video;
+          const media = new YouTubeMedia(
+            requester,
+            video.id,
+            title.toString(),
+            seconds,
+            description,
+            best_thumbnail?.url || '',
+            {
+              id,
+              title: channel.title || '',
+              thumbnail: channel.metadata.thumbnail?.[0]?.url || ''
+            }
+          );
+          medias.push(media);
+        }
+      }
+      return medias;
+    }
   }
 }
 
