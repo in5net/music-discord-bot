@@ -1,5 +1,5 @@
 #!/bin/sh
-until bun run start
+until pnpm start
 do
     echo "Restarting bot..."
     sleep 1
