@@ -1,22 +1,21 @@
-/* eslint-disable import/no-cycle */
-import play from './play';
-import playnow from './playnow';
-import queue from './queue';
-import next from './next';
-import pause from './pause';
-import shuffle from './shuffle';
-import playshuffle from './playshuffle';
-import loop from './loop';
-import move from './move';
-import remove from './remove';
-import seek from './seek';
-import stop from './stop';
-import soundboard from './soundboard';
-import lyrics from './lyrics';
-import playlist from './playlist';
-import hz from './hz';
-import playnext from './playnext';
-import type Command from '$services/command';
+import play from './play.js';
+import playnow from './playnow.js';
+import queue from './queue.js';
+import next from './next.js';
+import pause from './pause.js';
+import shuffle from './shuffle.js';
+import playshuffle from './playshuffle.js';
+import loop from './loop.js';
+import move from './move.js';
+import remove from './remove.js';
+import seek from './seek.js';
+import stop from './stop.js';
+import soundboard from './soundboard.js';
+import lyrics from './lyrics.js';
+import playlist from './playlist.js';
+import hz from './hz.js';
+import playnext from './playnext.js';
+import type Command from '$services/command.js';
 
 const commands: Command[] = [
   play,

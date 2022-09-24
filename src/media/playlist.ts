@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client';
-import prisma from '$services/prisma';
+
+import prisma from '$services/prisma.js';
 import {
   FileMedia,
   MediaJSONType,
@@ -8,7 +9,7 @@ import {
   SpotifyMedia,
   URLMedia,
   YouTubeMedia
-} from './media';
+} from './media.js';
 
 async function getPlaylist(uid: string, name: string) {
   const { id, songs } = await prisma.playlist.findFirstOrThrow({

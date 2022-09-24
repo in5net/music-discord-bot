@@ -1,5 +1,4 @@
 import { youtube } from '@googleapis/youtube';
-import { extractID } from 'play-dl';
 
 const api = youtube({
   version: 'v3',
@@ -141,14 +140,4 @@ export async function getChannelVideos(id: string): Promise<Video[]> {
     ({ nextPageToken } = playlistRes.data);
   } while (nextPageToken && videos.length < 100);
   return videos;
-}
-
-if (require.main === module) {
-  (async () => {
-    const url =
-      'https://www.youtube.com/watch?v=lJSo28G7FK0&list=PL706D99B420CA57E6';
-    const id = extractID(url);
-    const videos = await getPlaylist(id);
-    console.log(videos.length);
-  })();
 }

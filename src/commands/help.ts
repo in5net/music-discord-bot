@@ -1,7 +1,6 @@
-import helpCommand from '$services/help';
-// eslint-disable-next-line import/no-cycle
-import commands from './index';
-import { color } from '$services/config';
+import helpCommand from '$services/help.js';
+import commands from './index.js';
+import { color } from '$services/config.js';
 
 const help = helpCommand('Thor Music', '-', color, commands);
 export default help;

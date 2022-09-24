@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
-import { Innertube } from 'youtubei.js';
+import Innertube from 'youtubei.js';
 import type {
   SoundCloudPlaylist,
   SoundCloudTrack,
@@ -9,14 +9,14 @@ import type {
   SpotifyPlaylist,
   SpotifyTrack
 } from 'play-dl';
+import Video from 'youtubei.js/dist/src/parser/classes/Video.js';
 
-import Video from 'youtubei.js/dist/src/parser/classes/Video';
 import {
   Channel,
   getChannelVideos,
   getDetails,
   search
-} from '$services/youtube';
+} from '$services/youtube.js';
 
 interface MediaJSON {
   title: string;
@@ -335,7 +335,7 @@ ${title} (${url})
           )
       );
     } catch {
-      const youtube = await Innertube.create();
+      const youtube = await Innertube.Innertube.create();
       const channel = await youtube.getChannel(id);
       const { videos } = await channel.getVideos();
       const medias: YouTubeMedia[] = [];

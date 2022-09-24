@@ -10,8 +10,8 @@ import {
   TextChannel
 } from 'discord.js';
 
-import { addOwnerUsername, color } from '$services/config';
-import type { MediaType as Media } from './media';
+import { addOwnerUsername, color } from '$services/config.js';
+import type { MediaType as Media } from './media.js';
 
 const pageSize = 5;
 

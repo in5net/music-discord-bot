@@ -1,8 +1,8 @@
 import { ChannelType } from 'discord.js';
-// eslint-disable-next-line import/no-cycle
-import { getPlayer } from '../players';
-import woof from '$services/woof';
-import { command } from '$services/command';
+
+import { getPlayer } from '../players.js';
+import woof from '$services/woof.js';
+import { command } from '$services/command.js';
 
 export default command(
   {

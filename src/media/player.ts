@@ -23,21 +23,26 @@ import {
   EmbedBuilder,
   InteractionCollector,
   Message,
-  MessageOptions,
+  MessageCreateOptions,
   TextChannel,
   VoiceChannel
 } from 'discord.js';
 import { shuffle } from '@in5net/limitless';
 import type { AudioResource } from '@discordjs/voice';
 
-import Queue, { secondsToTime } from './queue';
-import { getLyrics } from '$services/genius';
-import { SoundCloudMedia, SpotifyMedia, URLMedia, YouTubeMedia } from './media';
-import * as playlist from './playlist';
-import { addOwnerUsername, color } from '$services/config';
+import Queue, { secondsToTime } from './queue.js';
+import { getLyrics } from '$services/genius.js';
+import {
+  SoundCloudMedia,
+  SpotifyMedia,
+  URLMedia,
+  YouTubeMedia
+} from './media.js';
+import * as playlist from './playlist.js';
+import { addOwnerUsername, color } from '$services/config.js';
 // eslint-disable-next-line import/no-cycle
-import bot from '../bot';
-import type { MediaType } from './media';
+import bot from '../bot.js';
+import type { MediaType } from './media.js';
 
 const YOUTUBE_CHANNEL_REGEX =
   /https?:\/\/(?:www\.)?youtube\.com\/(channel|c)\/([a-zA-Z0-9_-]+)/;
@@ -87,7 +92,7 @@ export default class Player {
 
   constructor(private onStop: () => void) {}
 
-  async send(message: string | MessageOptions): Promise<void> {
+  async send(message: string | MessageCreateOptions): Promise<void> {
     await this.message?.delete().catch(() => {});
     this.message = await this.channel?.send(message);
   }

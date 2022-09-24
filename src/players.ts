@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-cycle
-import Player from './media/player';
+import Player from './media/player.js';
 
 const players = new Map<string, Player>();
 export default players;

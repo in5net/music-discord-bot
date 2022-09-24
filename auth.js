@@ -1,2 +1,3 @@
-const { authorization } = require('play-dl');
+import { authorization } from 'play-dl';
+
 authorization();

@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import type { ColorResolvable } from 'discord.js';
 
-import { command } from '$services/command';
+import { command } from '$services/command.js';
 import type Command from '$services/command';
 
 export default function helpCommand(

@@ -1,7 +1,8 @@
 import { AttachmentBuilder } from 'discord.js';
-import wav from '$services/wavstream';
-import woof from '$services/woof';
-import { command } from '$services/command';
+
+import wav from '$services/wavstream.js';
+import woof from '$services/woof.js';
+import { command } from '$services/command.js';
 
 export default command(
   {

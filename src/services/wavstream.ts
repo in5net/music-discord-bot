@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import header from './waveheader';
+import header from './waveheader.js';
 
 const channels = 1;
 const sampleRate = 44100;
