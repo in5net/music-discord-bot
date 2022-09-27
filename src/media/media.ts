@@ -1,7 +1,8 @@
 import { EmbedBuilder } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
-import Innertube from 'youtubei.js';
+import { Innertube } from 'youtubei.js';
+import GridVideo from 'youtubei.js/dist/src/parser/classes/GridVideo.js';
 import type {
   SoundCloudPlaylist,
   SoundCloudTrack,
@@ -9,7 +10,6 @@ import type {
   SpotifyPlaylist,
   SpotifyTrack
 } from 'play-dl';
-import Video from 'youtubei.js/dist/src/parser/classes/Video.js';
 
 import {
   Channel,
@@ -17,6 +17,7 @@ import {
   getDetails,
   search
 } from '$services/youtube.js';
+import { str2Seconds } from '$services/time.js';
 
 interface MediaJSON {
   title: string;
@@ -335,25 +336,26 @@ ${title} (${url})
           )
       );
     } catch {
-      const youtube = await Innertube.Innertube.create();
+      const youtube = await Innertube.create();
       const channel = await youtube.getChannel(id);
       const { videos } = await channel.getVideos();
       const medias: YouTubeMedia[] = [];
       for (const video of videos) {
-        if (video.is(Video)) {
+        if (video.is(GridVideo.default)) {
           const {
             title,
-            duration: { seconds },
-            description,
-            best_thumbnail
+            duration,
+            thumbnails: [thumbnail]
           } = video;
           const media = new YouTubeMedia(
             requester,
             video.id,
             title.toString(),
-            seconds,
-            description,
-            best_thumbnail?.url || '',
+            str2Seconds(
+              typeof duration === 'string' ? duration : duration.text
+            ),
+            undefined,
+            thumbnail?.url || '',
             {
               id,
               title: channel.title || '',
