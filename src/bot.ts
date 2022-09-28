@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import { IntentsBitField } from 'discord.js';
 
 import DiscordBot from '$services/bot.js';

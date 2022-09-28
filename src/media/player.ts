@@ -40,7 +40,6 @@ import {
 } from './media.js';
 import * as playlist from './playlist.js';
 import { addOwnerUsername, color } from '$services/config.js';
-// eslint-disable-next-line import/no-cycle
 import bot from '../bot.js';
 import type { MediaType } from './media.js';
 
