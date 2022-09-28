@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import play from 'play-dl';
 import chalk from 'chalk';
-import { Innertube } from 'youtubei.js';
+import Youtubei from 'youtubei.js';
 import GridVideo from 'youtubei.js/dist/src/parser/classes/GridVideo.js';
 import type {
   SoundCloudPlaylist,
@@ -336,7 +336,7 @@ ${title} (${url})
           )
       );
     } catch {
-      const youtube = await Innertube.create();
+      const youtube = await Youtubei.Innertube.create();
       const channel = await youtube.getChannel(id);
       const { videos } = await channel.getVideos();
       const medias: YouTubeMedia[] = [];
